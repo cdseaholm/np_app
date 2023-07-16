@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "636737039961",
+    "firebase_url": "https://newprogressapp-default-rtdb.firebaseio.com",
+    "project_id": "newprogressapp",
+    "storage_bucket": "newprogressapp.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:636737039961:android:ad47f70b247480c8f44b48",
+        "android_client_info": {
+          "package_name": "com.caels.np_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "636737039961-ccmcofksl2ocufu9lu47l1873p28agbo.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAX5y_TAGZD0rfL_ogGxy0reOEqDfwuFaM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "636737039961-ccmcofksl2ocufu9lu47l1873p28agbo.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "636737039961-0cu93gti7ec21fufo55ade9859u3jf0o.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.npApp.RunnerTests"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

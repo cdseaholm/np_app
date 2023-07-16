@@ -1,0 +1,16 @@
+### when adding new firebase flutterfire configuration:
+
+From your Flutter project directory, run the following command:
+
+
+flutter pub add PLUGIN_NAME
+From your Flutter project directory, run the following command:
+
+
+flutterfire configure
+Running this command ensures that your Flutter app's Firebase configuration is up-to-date and, for Crashlytics and Performance Monitoring on Android, adds the required Gradle plugins to your app.
+
+Once complete, rebuild your Flutter project:
+
+
+flutter run
