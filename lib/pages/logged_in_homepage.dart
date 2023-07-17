@@ -135,7 +135,9 @@ Widget _loggedInHomeUI(BuildContext context) {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => const LoggedOutHomePage(),
+                    builder: (_) => LoggedOutHomePage(
+                      onLoginOptionSelected: (bool value) {},
+                    ),
                   ),
                 );
               }
@@ -148,7 +150,9 @@ Widget _loggedInHomeUI(BuildContext context) {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => const LoggedOutHomePage(),
+                          builder: (_) => LoggedOutHomePage(
+                            onLoginOptionSelected: (bool value) {},
+                          ),
                         ),
                       );
                     },

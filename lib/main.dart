@@ -28,7 +28,7 @@ class _MyAppState extends State<MyApp> {
         primaryColor: Colors.black,
         hintColor: const Color.fromARGB(176, 5, 53, 20),
       ),
-      home: const MainPaige(),
+      home: const MainPage(),
       debugShowCheckedModeBanner: false,
     );
   }

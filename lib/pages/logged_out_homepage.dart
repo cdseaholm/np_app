@@ -10,7 +10,12 @@ import '../auth/forms/login.dart';
 import 'statisticspage.dart';
 
 class LoggedOutHomePage extends StatefulWidget {
-  const LoggedOutHomePage({super.key});
+  final Function(bool value) onLoginOptionSelected;
+
+  const LoggedOutHomePage({
+    Key? key,
+    required this.onLoginOptionSelected,
+  }) : super(key: key);
 
   @override
   State<LoggedOutHomePage> createState() => _LoggedOutHomePageState();

@@ -1,5 +1,6 @@
 ###notes for ideas: 
 
+    figure out remainSignedIn**maybe see userpreferences in Firebase
     add in username
     clean logo?
     if/auto order tasks by importance
@@ -30,7 +31,13 @@
 
 ### github save
 
-    Anytime saving to github: 
+    1. Open terminal and enter the folder of the github repository/project you want to update
+    2. Type into terminal: “git add .” and then hit enter
+    3. Type into terminal “git status” and then hit enter (this step is optional)
+    4. Type into terminal “git commit -m ‘type any message here” and then hit enter
+    5. Type into terminal “git push” and then hit enter
+
+    Anytime creating new repository in github:
 
     git remote add origin https://github.com/cdseaholm/np_app.git
     git branch -M main

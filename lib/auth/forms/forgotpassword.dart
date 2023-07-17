@@ -464,7 +464,9 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                            builder: (_) => const LoggedOutHomePage()),
+                            builder: (_) => LoggedOutHomePage(
+                                  onLoginOptionSelected: (bool value) {},
+                                )),
                       );
                     },
                     child: const Text('Return Home'),

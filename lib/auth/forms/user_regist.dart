@@ -458,7 +458,9 @@ class _RegisterPageState extends State<RegisterPage> {
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
-                          builder: (_) => const LoggedOutHomePage()),
+                          builder: (_) => LoggedOutHomePage(
+                                onLoginOptionSelected: (bool value) {},
+                              )),
                     );
                   },
                   child: const Text(
