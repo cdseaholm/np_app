@@ -21,11 +21,11 @@ class _AuthPageState extends State<AuthPage> {
     checkLoggedInUser();
   }
 
-  Future<void> checkLoggedInUser() async {
+  Future checkLoggedInUser() async {
     final currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser != null) {
       setState(() {
-        showLoginScreen = false;
+        LoggedInHomePage;
       });
     }
   }

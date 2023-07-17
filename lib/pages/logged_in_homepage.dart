@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:snippet_coder_utils/hex_color.dart';
 
 import '../backend/botnavbar.dart';
 import 'calendarpage.dart';
@@ -83,25 +84,45 @@ Widget _loggedInHomeUI(BuildContext context) {
   return Container(
     width: MediaQuery.of(context).size.width,
     height: MediaQuery.of(context).size.height / 12,
-    decoration: const BoxDecoration(
-      color: Color.fromARGB(200, 5, 53, 20),
+    decoration: BoxDecoration(
+      color: HexColor("#456B4C"),
     ),
     child: Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        Image.asset(
-          'assets/Images/nplogo.png',
-          fit: BoxFit.contain,
-          width: 40,
-          height: 40,
+        ClipRRect(
+          borderRadius: BorderRadius.circular(10),
+          child: Image.asset(
+            'assets/Images/nplogo.png',
+            fit: BoxFit.contain,
+            width: 50,
+            height: 40,
+          ),
         ),
-        const Flexible(
+        Flexible(
           child: Card(
             child: Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Text(
-                "[User's Name] Progress",
-                style: TextStyle(fontSize: 14.0),
+              padding: const EdgeInsets.all(8.0),
+              child: FutureBuilder<User?>(
+                future: FirebaseAuth.instance.authStateChanges().first,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const CircularProgressIndicator();
+                  } else if (snapshot.hasError) {
+                    return Text('Error: ${snapshot.error}');
+                  } else if (snapshot.hasData) {
+                    User? user = snapshot.data;
+                    String? email = user?.email;
+                    String? username = email?.split('@').first;
+
+                    return Text(
+                      "$username's Progress",
+                      style: const TextStyle(fontSize: 14.0),
+                    );
+                  } else {
+                    return const Text('No user found');
+                  }
+                },
               ),
             ),
           ),

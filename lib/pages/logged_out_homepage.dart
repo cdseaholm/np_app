@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:snippet_coder_utils/hex_color.dart';
 
 import '../auth/forms/user_regist.dart';
 import '../backend/botnavbar.dart';
@@ -83,17 +84,20 @@ Widget _loggedOutHomeUI(BuildContext context) {
   return Container(
     width: MediaQuery.of(context).size.width,
     height: MediaQuery.of(context).size.height / 12,
-    decoration: const BoxDecoration(
-      color: Color.fromARGB(200, 5, 53, 20),
+    decoration: BoxDecoration(
+      color: HexColor("#456B4C"),
     ),
     child: Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        Image.asset(
-          'assets/Images/nplogo.png',
-          fit: BoxFit.contain,
-          width: 40,
-          height: 40,
+        ClipRRect(
+          borderRadius: BorderRadius.circular(10),
+          child: Image.asset(
+            'assets/Images/nplogo.png',
+            fit: BoxFit.contain,
+            width: 50,
+            height: 40,
+          ),
         ),
         Flexible(
           child: GestureDetector(
