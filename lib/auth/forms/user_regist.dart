@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:np_app/auth/forms/login.dart';
@@ -20,8 +21,20 @@ class _RegisterPageState extends State<RegisterPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final _firstNameController = TextEditingController();
+  final _lastNameController = TextEditingController();
   bool hidePassword = true;
   bool hideConfirmPassword = true;
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    _firstNameController.dispose();
+    _lastNameController.dispose();
+    super.dispose();
+  }
 
   Future signUp() async {
     showDialog(
@@ -37,7 +50,21 @@ class _RegisterPageState extends State<RegisterPage> {
       await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
-        confirmPassword: _confirmPasswordController.text.trim(),
+      );
+
+      Future addUserDetails(
+          String firstName, String lastName, String email) async {
+        await FirebaseFirestore.instance.collection('users').add({
+          'first name': '',
+          'last name': '',
+          'email': '',
+        });
+      }
+
+      addUserDetails(
+        _firstNameController.text.trim(),
+        _lastNameController.text.trim(),
+        _emailController.text.trim(),
       );
 
       // ignore: use_build_context_synchronously
@@ -232,14 +259,6 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   @override
-  void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    _confirmPasswordController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
@@ -301,6 +320,54 @@ class _RegisterPageState extends State<RegisterPage> {
             const SizedBox(
               height: 20,
             ),
+
+            //first and last name
+            Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                child: Row(children: [
+                  Expanded(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        border: Border.all(color: Colors.white),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 20.0),
+                        child: TextField(
+                          controller: _firstNameController,
+                          decoration: const InputDecoration(
+                            prefixIcon: Icon(Icons.account_circle),
+                            border: InputBorder.none,
+                            hintText: 'First Name',
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 5),
+                  Expanded(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        border: Border.all(color: Colors.white),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 20.0),
+                        child: TextField(
+                          controller: _lastNameController,
+                          decoration: const InputDecoration(
+                            prefixIcon: Icon(Icons.account_circle),
+                            border: InputBorder.none,
+                            hintText: 'Last Name',
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ])),
+            const SizedBox(height: 10),
 
             //email
             Padding(
@@ -458,9 +525,8 @@ class _RegisterPageState extends State<RegisterPage> {
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
-                          builder: (_) => LoggedOutHomePage(
-                                onLoginOptionSelected: (bool value) {},
-                              )),
+                        builder: (_) => const LoggedOutHomePage(),
+                      ),
                     );
                   },
                   child: const Text(

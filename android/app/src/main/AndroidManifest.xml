@@ -1,4 +1,7 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.caels.np_app">
+    <uses-sdk android:minSdkVersion="19" android:targetSdkVersion="30" />
+
     <application
         android:label="np_app"
         android:name="${applicationName}"

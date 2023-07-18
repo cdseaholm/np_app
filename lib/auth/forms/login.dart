@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:np_app/auth/forms/forgotpassword.dart';
 import 'package:np_app/auth/forms/user_regist.dart';
 import 'package:np_app/pages/logged_in_homepage.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:snippet_coder_utils/hex_color.dart';
+
+import 'google_auth.dart';
 
 class LoginScreen extends StatefulWidget {
   final VoidCallback onSignInSuccess;
@@ -21,19 +22,6 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
   bool hidePassword = true;
   bool hideConfirmPassword = true;
-  bool remainSignedIn = false;
-
-  void onSignInSuccess() async {
-    await FirebaseAuth.instance.signInWithEmailAndPassword(
-      email: _emailController.text.trim(),
-      password: _passwordController.text.trim(),
-    );
-
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('Remain Signed In?', remainSignedIn);
-
-    widget.onSignInSuccess();
-  }
 
   Future signIn() async {
     showDialog(
@@ -476,33 +464,6 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             const SizedBox(height: 20),
 
-            Container(
-              height: 30,
-              alignment: Alignment.centerRight,
-              child: Padding(
-                padding: const EdgeInsets.only(right: 20),
-                child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-                  const Text(
-                    'Remain Signed In?',
-                    style: TextStyle(color: Colors.blue, fontSize: 12),
-                  ),
-                  StatefulBuilder(
-                    builder: (context, setState) {
-                      return Checkbox(
-                        value: remainSignedIn,
-                        onChanged: (value) {
-                          setState(() {
-                            remainSignedIn = value ?? false;
-                          });
-                        },
-                      );
-                    },
-                  ),
-                ]),
-              ),
-            ),
-            const SizedBox(height: 20),
-
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 25.0),
               child: Row(
@@ -530,17 +491,24 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
 
-            const SizedBox(height: 50),
+            const SizedBox(height: 20),
 
             // google + apple sign in buttons
-            const Row(
+            Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 // google button
-                //SquareTile(imagePath: 'lib/images/google.png'),
-
-                SizedBox(width: 25),
-
+                GestureDetector(
+                    onTap: () => AuthService().signInWithGoogle(),
+                    child: Row(children: [
+                      Image.asset(
+                        'assets/Images/google.png',
+                        width: 24,
+                        height: 24,
+                      ),
+                      const SizedBox(width: 8),
+                      const Text('Sign in with Google'),
+                    ]))
                 // apple button
                 //SquareTile(imagePath: 'lib/images/apple.png')
               ],

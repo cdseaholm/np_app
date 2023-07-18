@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:snippet_coder_utils/hex_color.dart';
@@ -112,15 +113,32 @@ Widget _loggedInHomeUI(BuildContext context) {
                     return Text('Error: ${snapshot.error}');
                   } else if (snapshot.hasData) {
                     User? user = snapshot.data;
-                    String? email = user?.email;
-                    String? username = email?.split('@').first;
-
-                    return Text(
-                      "$username's Progress",
-                      style: const TextStyle(fontSize: 14.0),
+                    String? uid = user?.uid;
+                    return StreamBuilder<DocumentSnapshot>(
+                      stream: FirebaseFirestore.instance
+                          .collection('users')
+                          .doc(uid)
+                          .snapshots(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const CircularProgressIndicator();
+                        } else if (snapshot.hasError) {
+                          return Text('Error: ${snapshot.error}');
+                        } else if (snapshot.hasData) {
+                          String? firstName =
+                              snapshot.data?.get('firstName') ?? '';
+                          return Text(
+                            "$firstName's Progress",
+                            style: const TextStyle(fontSize: 14.0),
+                          );
+                        } else {
+                          return const Text('NewProgress');
+                        }
+                      },
                     );
                   } else {
-                    return const Text('No user found');
+                    return const Text('NewProgress');
                   }
                 },
               ),
@@ -135,9 +153,7 @@ Widget _loggedInHomeUI(BuildContext context) {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => LoggedOutHomePage(
-                      onLoginOptionSelected: (bool value) {},
-                    ),
+                    builder: (_) => const LoggedOutHomePage(),
                   ),
                 );
               }
@@ -147,12 +163,11 @@ Widget _loggedInHomeUI(BuildContext context) {
                 PopupMenuItem<String>(
                   child: GestureDetector(
                     onTap: () {
+                      FirebaseAuth.instance.signOut();
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => LoggedOutHomePage(
-                            onLoginOptionSelected: (bool value) {},
-                          ),
+                          builder: (_) => const LoggedOutHomePage(),
                         ),
                       );
                     },
