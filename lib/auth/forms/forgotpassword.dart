@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:np_app/auth/forms/user_regist.dart';
 import 'package:snippet_coder_utils/hex_color.dart';
 
-import '../../pages/logged_out_homepage.dart';
+import '../../view/logged_out_homepage.dart';
 import 'login.dart';
 
 class ForgotPassword extends StatefulWidget {

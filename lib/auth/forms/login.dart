@@ -2,10 +2,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:np_app/auth/forms/forgotpassword.dart';
 import 'package:np_app/auth/forms/user_regist.dart';
-import 'package:np_app/pages/logged_in_homepage.dart';
 import 'package:snippet_coder_utils/hex_color.dart';
 
-import 'google_auth.dart';
+import '../../view/logged_in_homepage.dart';
+import 'auth_services.dart';
 
 class LoginScreen extends StatefulWidget {
   final VoidCallback onSignInSuccess;
@@ -23,7 +23,7 @@ class _LoginScreenState extends State<LoginScreen> {
   bool hidePassword = true;
   bool hideConfirmPassword = true;
 
-  Future signIn() async {
+  Future<void> signIn(BuildContext context) async {
     showDialog(
       context: context,
       builder: (context) {
@@ -46,23 +46,23 @@ class _LoginScreenState extends State<LoginScreen> {
       Navigator.pop(context);
 
       if (_emailController.text.trim().isEmpty) {
-        emptyEmailMessage();
+        emptyEmailMessage(context);
       } else if (_passwordController.text.trim().isEmpty) {
-        emptyPasswordMessage();
+        emptyPasswordMessage(context);
       } else if (e.code == 'user-not-found') {
-        wrongEmailMessage();
+        wrongEmailMessage(context);
       } else if (e.code == 'wrong-password') {
-        wrongPasswordMessage();
+        wrongPasswordMessage(context);
       } else if (e.code == 'user-disabled') {
-        userDisabledMessage();
+        userDisabledMessage(context);
       } else if (e.code == 'invalid-email') {
-        invalidEmailMessage();
+        invalidEmailMessage(context);
       }
     }
   }
 
   //emptyEmail
-  void emptyEmailMessage() {
+  void emptyEmailMessage(BuildContext context) {
     showDialog(
       context: context,
       builder: (context) {
@@ -90,7 +90,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   //emptyPassword
-  void emptyPasswordMessage() {
+  void emptyPasswordMessage(BuildContext context) {
     showDialog(
       context: context,
       builder: (context) {
@@ -118,7 +118,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   //user not found
-  void wrongEmailMessage() {
+  void wrongEmailMessage(BuildContext context) {
     showDialog(
       context: context,
       builder: (context) {
@@ -163,7 +163,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   // wrong password
-  void wrongPasswordMessage() {
+  void wrongPasswordMessage(BuildContext context) {
     showDialog(
       context: context,
       builder: (context) {
@@ -206,7 +206,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   //user disabled (for future when using users)
-  void userDisabledMessage() {
+  void userDisabledMessage(BuildContext context) {
     showDialog(
       context: context,
       builder: (context) {
@@ -234,7 +234,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   //invalid email
-  void invalidEmailMessage() {
+  void invalidEmailMessage(BuildContext context) {
     showDialog(
       context: context,
       builder: (context) {
@@ -448,7 +448,7 @@ class _LoginScreenState extends State<LoginScreen> {
             Padding(
               padding: const EdgeInsets.only(left: 75, right: 75),
               child: GestureDetector(
-                onTap: signIn,
+                onTap: () => signIn(context),
                 child: Container(
                   padding: const EdgeInsets.all(15),
                   decoration: BoxDecoration(
@@ -499,7 +499,7 @@ class _LoginScreenState extends State<LoginScreen> {
               children: [
                 // google button
                 GestureDetector(
-                    onTap: () => AuthService().signInWithGoogle(),
+                    onTap: () => GoogleAuthService().signInWithGoogle(context),
                     child: Row(children: [
                       Image.asset(
                         'assets/Images/google.png',

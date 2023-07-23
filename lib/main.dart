@@ -1,35 +1,33 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:np_app/backend/firebase_options.dart';
 
 import 'package:firebase_core/firebase_core.dart';
-import 'package:np_app/pages/main_page.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:np_app/view/main_page.dart';
 
-Future<void> main() async {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp();
+  FirebaseAuth.instance.authStateChanges().listen((User? user) {});
+
   runApp(const MyApp());
 }
 
-class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
 
-  @override
-  State<MyApp> createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'NewProgress',
-      theme: ThemeData(
-        primaryColor: Colors.black,
-        hintColor: const Color.fromARGB(176, 5, 53, 20),
+    return ProviderScope(
+      child: MaterialApp(
+        title: 'NewProgress',
+        theme: ThemeData(
+          primaryColor: Colors.black,
+          hintColor: const Color.fromARGB(176, 5, 53, 20),
+        ),
+        home: const MainPage(),
+        debugShowCheckedModeBanner: false,
       ),
-      home: const MainPage(),
-      debugShowCheckedModeBanner: false,
     );
   }
 }

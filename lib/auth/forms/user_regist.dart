@@ -1,11 +1,12 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:np_app/auth/forms/login.dart';
-import 'package:np_app/pages/logged_in_homepage.dart';
+import 'package:np_app/view/logged_in_homepage.dart';
 import 'package:snippet_coder_utils/hex_color.dart';
-
-import '../../pages/logged_out_homepage.dart';
+import '../../view/logged_out_homepage.dart';
 
 class RegisterPage extends StatefulWidget {
   final VoidCallback showLoginScreen;
@@ -23,6 +24,8 @@ class _RegisterPageState extends State<RegisterPage> {
   final _confirmPasswordController = TextEditingController();
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
+  final CollectionReference users =
+      FirebaseFirestore.instance.collection('users');
   bool hidePassword = true;
   bool hideConfirmPassword = true;
 
@@ -36,7 +39,7 @@ class _RegisterPageState extends State<RegisterPage> {
     super.dispose();
   }
 
-  Future signUp() async {
+  Future<void> signUp() async {
     showDialog(
       context: context,
       builder: (context) {
@@ -47,29 +50,28 @@ class _RegisterPageState extends State<RegisterPage> {
     );
 
     try {
-      await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      UserCredential result =
+          await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
 
-      Future addUserDetails(
-          String firstName, String lastName, String email) async {
-        await FirebaseFirestore.instance.collection('users').add({
-          'first name': '',
-          'last name': '',
-          'email': '',
-        });
-      }
+      User? user = result.user;
+      String displayName = _firstNameController.text.trim();
+
+      await user?.updateDisplayName(_firstNameController.text.trim());
 
       addUserDetails(
-        _firstNameController.text.trim(),
+        displayName,
         _lastNameController.text.trim(),
         _emailController.text.trim(),
       );
 
       // ignore: use_build_context_synchronously
       Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (_) => const LoggedInHomePage()));
+        context,
+        MaterialPageRoute(builder: (_) => const LoggedInHomePage()),
+      );
     } on FirebaseAuthException catch (e) {
       Navigator.pop(context);
 
@@ -88,6 +90,14 @@ class _RegisterPageState extends State<RegisterPage> {
         invalidEmailMessage();
       }
     }
+  }
+
+  Future addUserDetails(String firstName, String lastName, String email) async {
+    await FirebaseFirestore.instance.collection('users').add({
+      'first name': firstName,
+      'last name': lastName,
+      'email': email,
+    });
   }
 
   //emptyEmail
