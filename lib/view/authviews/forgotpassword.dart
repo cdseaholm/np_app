@@ -1,10 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:np_app/auth/forms/user_regist.dart';
+import 'package:np_app/view/authviews/user_regist.dart';
 import 'package:snippet_coder_utils/hex_color.dart';
 
-import '../../view/logged_out_homepage.dart';
-import 'login.dart';
+import '../main_user_views/logged_out_homepage.dart';
+import 'login_screen.dart';
 
 class ForgotPassword extends StatefulWidget {
   const ForgotPassword({Key? key}) : super(key: key);
@@ -54,9 +54,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => LoginScreen(
-                          onSignInSuccess: () {},
-                        ),
+                        builder: (_) => const LoginScreen(),
                       ),
                     );
                   },
@@ -445,9 +443,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => LoginScreen(
-                            onSignInSuccess: () {},
-                          ),
+                          builder: (_) => const LoginScreen(),
                         ),
                       );
                     },

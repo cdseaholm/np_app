@@ -3,10 +3,10 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:np_app/auth/forms/login.dart';
-import 'package:np_app/view/logged_in_homepage.dart';
+import 'package:np_app/view/authviews/login_screen.dart';
+import 'package:np_app/view/main_user_views/logged_in_homepage.dart';
 import 'package:snippet_coder_utils/hex_color.dart';
-import '../../view/logged_out_homepage.dart';
+import '../main_user_views/logged_out_homepage.dart';
 
 class RegisterPage extends StatefulWidget {
   final VoidCallback showLoginScreen;
@@ -508,10 +508,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(
-                          builder: (_) => LoginScreen(
-                                onSignInSuccess: () {},
-                              )),
+                      MaterialPageRoute(builder: (_) => const LoginScreen()),
                     );
                   },
                   child: const Text(

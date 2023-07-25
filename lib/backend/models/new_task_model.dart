@@ -4,21 +4,51 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
 import 'package:np_app/backend/constants/app_style.dart';
+import 'package:np_app/backend/models/todo_model.dart';
 import 'package:np_app/backend/widget/date_time_widget.dart';
 import 'package:np_app/backend/widget/radio_widget.dart';
-import 'package:np_app/provider/date_time_provider.dart';
-import 'package:np_app/provider/radio_provider.dart';
+import 'package:np_app/provider/credproviders/cred_model_provider.dart';
+import 'package:np_app/provider/taskproviders/date_time_provider.dart';
+import 'package:np_app/provider/taskproviders/radio_provider.dart';
+import 'package:np_app/provider/taskproviders/service_provider.dart';
 
 import '../widget/textfield_widget.dart';
+import 'cred_model.dart';
 
-class AddNewTaskModel extends ConsumerWidget {
+class AddNewTaskModel extends ConsumerStatefulWidget {
   const AddNewTaskModel({
-    super.key,
-  });
+    Key? key,
+  }) : super(key: key);
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ConsumerStatefulWidget> createState() =>
+      _AddNewTaskModelState();
+}
+
+class _AddNewTaskModelState extends ConsumerState<AddNewTaskModel> {
+  final titleController = TextEditingController();
+  final descriptionController = TextEditingController();
+  late CredModel credModel;
+
+  @override
+  void initState() {
+    super.initState();
+    titleController.text = '';
+    descriptionController.text = '';
+    credModel = ref.read(credModelProvider);
+  }
+
+  @override
+  void dispose() {
+    titleController.dispose();
+    descriptionController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final dateProv = ref.watch(dateProvider);
+    final userId = credModel.docID;
     return Container(
         padding: const EdgeInsets.all(30),
         height: MediaQuery.of(context).size.height * 0.75,
@@ -48,11 +78,19 @@ class AddNewTaskModel extends ConsumerWidget {
             style: AppStyle.headingOne,
           ),
           const Gap(6),
-          const TextFieldWidget(maxLine: 1, hintText: 'Add Task Name'),
+          TextFieldWidget(
+            maxLine: 1,
+            hintText: 'Add Task Name',
+            txtController: titleController,
+          ),
           const Gap(12),
           const Text('Description', style: AppStyle.headingOne),
           const Gap(6),
-          const TextFieldWidget(maxLine: 3, hintText: 'Add Descriptions'),
+          TextFieldWidget(
+            maxLine: 3,
+            hintText: 'Add Descriptions',
+            txtController: descriptionController,
+          ),
           const Gap(12),
           const Text('Category', style: AppStyle.headingOne),
           Row(
@@ -161,7 +199,36 @@ class AddNewTaskModel extends ConsumerWidget {
                     ),
                     padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
-                  onPressed: () {},
+                  onPressed: () {
+                    final getRadioValue = ref.read(radioProvider);
+                    String category = '';
+
+                    switch (getRadioValue) {
+                      case 1:
+                        category = 'Learning';
+                        break;
+                      case 2:
+                        category = 'Working';
+                        break;
+                      case 3:
+                        category = 'General';
+                        break;
+                    }
+
+                    final toDoModel = ToDoModel(
+                      credModel: credModel,
+                      titleTask: titleController.text.trim(),
+                      description: descriptionController.text.trim(),
+                      category: category,
+                      dateTask: ref.read(dateProvider),
+                      timeTask: ref.read(timeProvider),
+                    );
+
+                    ref.read(serviceProvider).addNewTask(toDoModel, userId!);
+
+                    // ignore: avoid_print
+                    print('Data is saving');
+                  },
                   child: const Text('Create'),
                 ),
               ),

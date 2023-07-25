@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
-import '../../backend/models/new_task_model.dart';
-import '../../backend/widget/card_task_widget.dart';
+import '../../../backend/models/new_task_model.dart';
+import '../../../backend/widget/card_task_widget.dart';
 
 class Tasks extends StatefulWidget {
   const Tasks({super.key});

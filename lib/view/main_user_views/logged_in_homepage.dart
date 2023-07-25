@@ -5,8 +5,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import '../auth/forms/auth_services.dart';
-import '../backend/botnavbar.dart';
+import '../../backend/widget/botnavbar_widget.dart';
+import '../../services/sign_out_service.dart';
 import 'viewdataplugs/task.dart';
 import 'calendarpage.dart';
 import 'communitypage.dart';

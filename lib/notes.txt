@@ -1,8 +1,9 @@
 ###notes for ideas: 
 
     clean logo? => make oval for others to put photos in later
-    **at 56:18 in video
+    **at 2:26:32 in video/figure out why tasks are not saving in their respective IDs.
     if/auto order tasks by importance
+    splash screen?
     
 
 ###end of NFI

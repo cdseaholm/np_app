@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:np_app/provider/radio_provider.dart';
+import 'package:np_app/provider/taskproviders/radio_provider.dart';
 
 class RadioWidget extends ConsumerWidget {
   const RadioWidget({

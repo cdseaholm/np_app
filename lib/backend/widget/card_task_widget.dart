@@ -41,28 +41,27 @@ class CardToolListWidget extends StatelessWidget {
                               activeColor: Colors.blue.shade800,
                               shape: const CircleBorder(),
                               value: false,
+                              // ignore: avoid_print
                               onChanged: (value) => print(value),
                             ),
                           ),
                         ),
                         Transform.translate(
                           offset: const Offset(0, -12),
-                          child: Container(
-                            child: Column(
-                              children: [
-                                Divider(
-                                  thickness: 1.5,
-                                  color: Colors.grey.shade200,
-                                ),
-                                const Row(
-                                  children: [
-                                    Text('Today'),
-                                    Gap(12),
-                                    Text('9:15PM- 11:45PM')
-                                  ],
-                                )
-                              ],
-                            ),
+                          child: Column(
+                            children: [
+                              Divider(
+                                thickness: 1.5,
+                                color: Colors.grey.shade200,
+                              ),
+                              const Row(
+                                children: [
+                                  Text('Today'),
+                                  Gap(12),
+                                  Text('9:15PM- 11:45PM')
+                                ],
+                              )
+                            ],
                           ),
                         )
                       ],

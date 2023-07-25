@@ -1,265 +1,25 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:np_app/auth/forms/forgotpassword.dart';
-import 'package:np_app/auth/forms/user_regist.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:np_app/backend/login/login_controller.dart';
+import 'package:np_app/backend/login/login_state.dart';
+import 'package:np_app/view/authviews/forgotpassword.dart';
+import 'package:np_app/view/authviews/user_regist.dart';
 import 'package:snippet_coder_utils/hex_color.dart';
+import '../../services/auth_repository.dart';
+import '../main_user_views/logged_in_homepage.dart';
 
-import '../../view/logged_in_homepage.dart';
-import 'auth_services.dart';
-
-class LoginScreen extends StatefulWidget {
-  final VoidCallback onSignInSuccess;
-
-  const LoginScreen({Key? key, required this.onSignInSuccess})
-      : super(key: key);
+class LoginScreen extends StatefulHookConsumerWidget {
+  const LoginScreen({Key? key}) : super(key: key);
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool hidePassword = true;
   bool hideConfirmPassword = true;
-
-  Future<void> signIn(BuildContext context) async {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return const Center(
-          child: CircularProgressIndicator(),
-        );
-      },
-    );
-
-    try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
-      );
-
-      // ignore: use_build_context_synchronously
-      Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (_) => const LoggedInHomePage()));
-    } on FirebaseAuthException catch (e) {
-      Navigator.pop(context);
-
-      if (_emailController.text.trim().isEmpty) {
-        emptyEmailMessage(context);
-      } else if (_passwordController.text.trim().isEmpty) {
-        emptyPasswordMessage(context);
-      } else if (e.code == 'user-not-found') {
-        wrongEmailMessage(context);
-      } else if (e.code == 'wrong-password') {
-        wrongPasswordMessage(context);
-      } else if (e.code == 'user-disabled') {
-        userDisabledMessage(context);
-      } else if (e.code == 'invalid-email') {
-        invalidEmailMessage(context);
-      }
-    }
-  }
-
-  //emptyEmail
-  void emptyEmailMessage(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-            backgroundColor: HexColor("#456B4C"),
-            title: const Center(
-              child: Text(
-                'Email cannot be empty',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text(
-                  'Back',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            ]);
-      },
-    );
-  }
-
-  //emptyPassword
-  void emptyPasswordMessage(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-            backgroundColor: HexColor("#456B4C"),
-            title: const Center(
-              child: Text(
-                'Password cannot be empty',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text(
-                  'Back',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            ]);
-      },
-    );
-  }
-
-  //user not found
-  void wrongEmailMessage(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-            backgroundColor: HexColor("#456B4C"),
-            title: const Center(
-              child: Text(
-                'The Email was Incorrect',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => RegisterPage(
-                        showLoginScreen: () {},
-                      ),
-                    ),
-                  );
-                },
-                child: const Text(
-                  'Click here for Signup',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-              const SizedBox(width: 40),
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text(
-                  'Back',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            ]);
-      },
-    );
-  }
-
-  // wrong password
-  void wrongPasswordMessage(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-            backgroundColor: HexColor("#456B4C"),
-            title: const Center(
-              child: Text(
-                'The Password was Incorrect',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const ForgotPassword(),
-                    ),
-                  );
-                },
-                child: const Text(
-                  'Forgot Password? Click here',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-              const SizedBox(width: 40),
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text(
-                  'Back',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            ]);
-      },
-    );
-  }
-
-  //user disabled (for future when using users)
-  void userDisabledMessage(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-            backgroundColor: HexColor("#456B4C"),
-            title: const Center(
-              child: Text(
-                'This Email has been disabled or changed',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text(
-                  'Back',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            ]);
-      },
-    );
-  }
-
-  //invalid email
-  void invalidEmailMessage(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-            backgroundColor: HexColor("#456B4C"),
-            title: const Center(
-              child: Text(
-                'Email is Invalid',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text(
-                  'Back',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            ]);
-      },
-    );
-  }
 
   @override
   void dispose() {
@@ -270,6 +30,19 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<LoginState>(loginControllerProvider, ((previous, state) {
+      if (state is LoginStateError) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(state.error),
+        ));
+      } else if (state is LoginStateSuccess) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const LoggedInHomePage()),
+        );
+      }
+    }));
+
     return Scaffold(
       resizeToAvoidBottomInset: false,
       backgroundColor: Colors.grey[300],
@@ -448,7 +221,11 @@ class _LoginScreenState extends State<LoginScreen> {
             Padding(
               padding: const EdgeInsets.only(left: 75, right: 75),
               child: GestureDetector(
-                onTap: () => signIn(context),
+                onTap: () {
+                  ref
+                      .read(loginControllerProvider.notifier)
+                      .login(_emailController.text, _passwordController.text);
+                },
                 child: Container(
                   padding: const EdgeInsets.all(15),
                   decoration: BoxDecoration(
