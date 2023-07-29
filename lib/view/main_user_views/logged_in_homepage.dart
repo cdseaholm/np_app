@@ -4,23 +4,26 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:np_app/view/main_user_views/profile_page.dart';
 
 import '../../backend/widget/botnavbar_widget.dart';
 import '../../services/sign_out_service.dart';
-import 'viewdataplugs/task.dart';
+import '../../backend/tasks(all)/task.dart';
 import 'calendarpage.dart';
 import 'communitypage.dart';
 import 'goalspage.dart';
 import 'statisticspage.dart';
 
-class LoggedInHomePage extends StatefulWidget {
-  const LoggedInHomePage({Key? key}) : super(key: key);
+class LoggedInHomePage extends ConsumerStatefulWidget {
+  const LoggedInHomePage({super.key});
 
   @override
-  State<LoggedInHomePage> createState() => _LoggedInHomePageState();
+  ConsumerState<ConsumerStatefulWidget> createState() =>
+      _LoggedInHomePageState();
 }
 
-class _LoggedInHomePageState extends State<LoggedInHomePage> {
+class _LoggedInHomePageState extends ConsumerState<LoggedInHomePage> {
   late int _currentIndex;
   late ValueChanged<int> onTappedbar;
   late PageController _pageController;
@@ -57,6 +60,7 @@ class _LoggedInHomePageState extends State<LoggedInHomePage> {
         });
       }
     });
+
     _currentIndex = 0;
     _pageController = PageController(initialPage: _currentIndex);
   }
@@ -146,6 +150,18 @@ class _LoggedInHomePageState extends State<LoggedInHomePage> {
                         onSelected: (String value) {},
                         itemBuilder: (BuildContext context) {
                           return <PopupMenuEntry<String>>[
+                            PopupMenuItem<String>(
+                              child: GestureDetector(
+                                onTap: () => showModalBottomSheet(
+                                  isScrollControlled: true,
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16)),
+                                  context: context,
+                                  builder: (context) => const ProfilePage(),
+                                ),
+                                child: const Text('Profile'),
+                              ),
+                            ),
                             PopupMenuItem<String>(
                               child: GestureDetector(
                                 onTap: () => AuthSignOut().signOut(context),

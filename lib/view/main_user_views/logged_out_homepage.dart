@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:snippet_coder_utils/hex_color.dart';
 
-import '../authviews/user_regist.dart';
+import '../../backend/auth_pages/authviews/user_regist_screen.dart';
 import '../../backend/widget/botnavbar_widget.dart';
 import 'calendarpage.dart';
 import 'communitypage.dart';
 import 'goalspage.dart';
-import '../authviews/login_screen.dart';
+import '../../backend/auth_pages/allthings_login/login_screen.dart';
 import 'statisticspage.dart';
 
 class LoggedOutHomePage extends StatefulWidget {
@@ -121,14 +121,8 @@ Widget _loggedOutHomeUI(BuildContext context) {
         Flexible(
           child: GestureDetector(
             onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => RegisterPage(
-                    showLoginScreen: () {},
-                  ),
-                ),
-              );
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (_) => const RegisterPage()));
             },
             child: const Card(
               child: Padding(

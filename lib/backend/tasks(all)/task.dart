@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:gap/gap.dart';
+import 'package:intl/intl.dart';
+import 'package:np_app/backend/tasks(all)/provider/taskproviders/service_provider.dart';
 
-import '../../../backend/models/new_task_model.dart';
-import '../../../backend/widget/card_task_widget.dart';
+import 'new_task_model.dart';
+import 'widgets/card_task_widget.dart';
 
-class Tasks extends StatefulWidget {
+class Tasks extends ConsumerWidget {
   const Tasks({super.key});
 
   @override
-  State<Tasks> createState() => _TasksState();
-}
-
-class _TasksState extends State<Tasks> {
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final todoData = ref.watch(fetchDataProvider);
     return Scaffold(
       backgroundColor: Colors.grey.shade200,
       body: SingleChildScrollView(
@@ -24,10 +23,10 @@ class _TasksState extends State<Tasks> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Column(
+              Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  const Text(
                     'Today\'s Task',
                     style: TextStyle(
                         fontSize: 20,
@@ -35,8 +34,8 @@ class _TasksState extends State<Tasks> {
                         color: Colors.black),
                   ),
                   Text(
-                    'Sunday, July 23',
-                    style: TextStyle(color: Colors.grey),
+                    DateFormat('EEEE, MMMM d').format(DateTime.now()),
+                    style: const TextStyle(color: Colors.grey),
                   ),
                 ],
               ),
@@ -61,11 +60,15 @@ class _TasksState extends State<Tasks> {
             ],
           ),
           const Gap(20),
-          ListView.builder(
-            itemCount: 1,
-            shrinkWrap: true,
-            itemBuilder: (context, index) => const CardToolListWidget(),
-          ),
+          if (todoData.value != null)
+            SingleChildScrollView(
+              child: ListView.builder(
+                itemCount: todoData.value?.length ?? 0,
+                shrinkWrap: true,
+                itemBuilder: (context, index) =>
+                    CardToolListWidget(getIndex: index),
+              ),
+            ),
         ]),
       )),
     );

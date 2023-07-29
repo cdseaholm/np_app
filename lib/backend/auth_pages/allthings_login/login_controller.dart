@@ -1,5 +1,5 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:np_app/provider/credproviders/auth_provider.dart';
+import 'package:np_app/backend/auth_pages/auth_provider.dart';
 
 import 'login_state.dart';
 

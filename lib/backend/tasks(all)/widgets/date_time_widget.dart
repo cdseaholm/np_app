@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:gap/gap.dart';
 
-import '../constants/app_style.dart';
+import 'constants/app_style.dart';
 
 class DateTimeWidget extends ConsumerWidget {
   const DateTimeWidget({

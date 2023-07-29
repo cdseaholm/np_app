@@ -1,10 +1,18 @@
 ###notes for ideas: 
 
     clean logo? => make oval for others to put photos in later
-    **at 2:26:32 in video/figure out why tasks are not saving in their respective IDs.
-    if/auto order tasks by importance
+    tasks: 
+        -if/auto order tasks by importance
+        -update trash icon (smaller, move?)
+        -different views?
+        -different states (incomplete, complete, overdue, deleted(save for 7 days?))
+        -fix gmail Namesstates
     splash screen?
+    work on profile
     
+
+
+
 
 ###end of NFI
 

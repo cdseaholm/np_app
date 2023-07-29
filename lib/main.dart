@@ -2,14 +2,12 @@ import 'package:flutter/material.dart';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:np_app/backend/firebase_options.dart';
-import 'package:np_app/backend/models/auth_checker_model.dart';
+
+import 'package:np_app/backend/auth_pages/allthings_login/auth_checker_model.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp();
 
   runApp(const ProviderScope(
     child: MyApp(),

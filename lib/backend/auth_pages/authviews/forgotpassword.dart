@@ -1,10 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:np_app/view/authviews/user_regist.dart';
+import 'package:np_app/backend/auth_pages/authviews/user_regist_screen.dart';
 import 'package:snippet_coder_utils/hex_color.dart';
 
-import '../main_user_views/logged_out_homepage.dart';
-import 'login_screen.dart';
+import '../../../view/main_user_views/logged_out_homepage.dart';
+import '../allthings_login/login_screen.dart';
 
 class ForgotPassword extends StatefulWidget {
   const ForgotPassword({Key? key}) : super(key: key);
@@ -133,14 +133,8 @@ class _ForgotPasswordState extends State<ForgotPassword> {
             actions: [
               TextButton(
                 onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => RegisterPage(
-                        showLoginScreen: () {},
-                      ),
-                    ),
-                  );
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (_) => const RegisterPage()));
                 },
                 child: const Text(
                   'Click here for Signup',

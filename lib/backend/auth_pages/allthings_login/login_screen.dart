@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:np_app/backend/login/login_controller.dart';
-import 'package:np_app/backend/login/login_state.dart';
-import 'package:np_app/view/authviews/forgotpassword.dart';
-import 'package:np_app/view/authviews/user_regist.dart';
+import 'package:np_app/backend/auth_pages/allthings_login/login_controller.dart';
+import 'package:np_app/backend/auth_pages/allthings_login/login_state.dart';
+import 'package:np_app/backend/auth_pages/authviews/forgotpassword.dart';
 import 'package:snippet_coder_utils/hex_color.dart';
-import '../../services/auth_repository.dart';
-import '../main_user_views/logged_in_homepage.dart';
+import '../auth_repository.dart';
+import '../../../view/main_user_views/logged_in_homepage.dart';
+import '../authviews/user_regist_screen.dart';
 
 class LoginScreen extends StatefulHookConsumerWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -306,12 +306,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 GestureDetector(
                   onTap: () {
                     Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (_) => RegisterPage(
-                                showLoginScreen: () {},
-                              )),
-                    );
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => const RegisterPage()));
                   },
                   child: const Text(
                     'Register here',

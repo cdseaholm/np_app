@@ -3,15 +3,14 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:np_app/view/authviews/login_screen.dart';
 import 'package:np_app/view/main_user_views/logged_in_homepage.dart';
 import 'package:snippet_coder_utils/hex_color.dart';
-import '../main_user_views/logged_out_homepage.dart';
+
+import '../../../view/main_user_views/logged_out_homepage.dart';
+import '../allthings_login/login_screen.dart';
 
 class RegisterPage extends StatefulWidget {
-  final VoidCallback showLoginScreen;
-  const RegisterPage({Key? key, required this.showLoginScreen})
-      : super(key: key);
+  const RegisterPage({Key? key}) : super(key: key);
 
   @override
   State<RegisterPage> createState() => _RegisterPageState();
@@ -61,11 +60,8 @@ class _RegisterPageState extends State<RegisterPage> {
 
       await user?.updateDisplayName(_firstNameController.text.trim());
 
-      addUserDetails(
-        displayName,
-        _lastNameController.text.trim(),
-        _emailController.text.trim(),
-      );
+      addUserDetails(displayName, _firstNameController.text.trim(),
+          _lastNameController.text.trim(), _emailController.text.trim());
 
       // ignore: use_build_context_synchronously
       Navigator.pushReplacement(
@@ -75,7 +71,9 @@ class _RegisterPageState extends State<RegisterPage> {
     } on FirebaseAuthException catch (e) {
       Navigator.pop(context);
 
-      if (_emailController.text.trim().isEmpty) {
+      if (_firstNameController.text.trim().isEmpty) {
+        emptyFirstNameMessage();
+      } else if (_emailController.text.trim().isEmpty) {
         emptyEmailMessage();
       } else if (_passwordController.text.trim().isEmpty) {
         emptyPasswordMessage();
@@ -92,12 +90,43 @@ class _RegisterPageState extends State<RegisterPage> {
     }
   }
 
-  Future addUserDetails(String firstName, String lastName, String email) async {
-    await FirebaseFirestore.instance.collection('users').add({
+  Future addUserDetails(String displayName, String firstName, String lastName,
+      String email) async {
+    String uid = FirebaseAuth.instance.currentUser?.uid ?? '';
+    await FirebaseFirestore.instance.collection('users').doc(uid).set({
+      'display name': displayName,
       'first name': firstName,
       'last name': lastName,
       'email': email,
     });
+  }
+
+  //emptyFirstName
+  void emptyFirstNameMessage() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+            backgroundColor: HexColor("#456B4C"),
+            title: const Center(
+              child: Text(
+                'First Name cannot be empty',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text(
+                  'Back',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ]);
+      },
+    );
   }
 
   //emptyEmail
