@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:np_app/backend/auth_pages/allthings_login/login_controller.dart';
-import 'package:np_app/backend/auth_pages/allthings_login/login_state.dart';
 import 'package:np_app/backend/auth_pages/authviews/forgotpassword.dart';
 import 'package:snippet_coder_utils/hex_color.dart';
+import '../auth_provider.dart';
 import '../auth_repository.dart';
-import '../../../view/main_user_views/logged_in_homepage.dart';
 import '../authviews/user_regist_screen.dart';
 
 class LoginScreen extends StatefulHookConsumerWidget {
@@ -30,19 +28,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    ref.listen<LoginState>(loginControllerProvider, ((previous, state) {
-      if (state is LoginStateError) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(state.error),
-        ));
-      } else if (state is LoginStateSuccess) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const LoggedInHomePage()),
-        );
-      }
-    }));
-
+    final loginService = ref.watch(loginServiceProvider);
     return Scaffold(
       resizeToAvoidBottomInset: false,
       backgroundColor: Colors.grey[300],
@@ -222,9 +208,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               padding: const EdgeInsets.only(left: 75, right: 75),
               child: GestureDetector(
                 onTap: () {
-                  ref
-                      .read(loginControllerProvider.notifier)
-                      .login(_emailController.text, _passwordController.text);
+                  loginService.signIn(
+                      email: _emailController.text.trim(),
+                      password: _passwordController.text.trim(),
+                      context: context);
                 },
                 child: Container(
                   padding: const EdgeInsets.all(15),

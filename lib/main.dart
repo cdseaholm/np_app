@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import 'package:np_app/backend/auth_pages/allthings_login/auth_checker_model.dart';
+import 'package:np_app/backend/auth_pages/allthings_login/auth_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
         primaryColor: Colors.black,
         hintColor: const Color.fromARGB(176, 5, 53, 20),
       ),
-      home: const AuthChecker(),
+      home: const AuthPage(),
       debugShowCheckedModeBanner: false,
     );
   }

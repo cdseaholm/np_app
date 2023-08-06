@@ -1,6 +1,6 @@
 ###notes for ideas: 
 
-    clean logo? => make oval for others to put photos in later
+    allow pictures into logo
     tasks: 
         -if/auto order tasks by importance
         -update trash icon (smaller, move?)
@@ -9,6 +9,9 @@
         -fix gmail Namesstates
     splash screen?
     work on profile
+        -(pushs) having backs
+        -other fields
+    Habit tracker
     
 
 

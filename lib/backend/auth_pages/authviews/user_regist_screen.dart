@@ -3,10 +3,10 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:np_app/view/main_user_views/logged_in_homepage.dart';
 import 'package:snippet_coder_utils/hex_color.dart';
 
-import '../../../view/main_user_views/logged_out_homepage.dart';
+import '../../../view/logged_in_homepage.dart';
+import '../../../view/logged_out_homepage.dart';
 import '../allthings_login/login_screen.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -49,25 +49,34 @@ class _RegisterPageState extends State<RegisterPage> {
     );
 
     try {
-      UserCredential result =
-          await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
-      );
+      if (passwordMatchs() == true) {
+        UserCredential result =
+            await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          email: _emailController.text.trim(),
+          password: _passwordController.text.trim(),
+        );
 
-      User? user = result.user;
-      String displayName = _firstNameController.text.trim();
+        User? user = result.user;
+        String displayName = _firstNameController.text.trim();
 
-      await user?.updateDisplayName(_firstNameController.text.trim());
+        await user?.updateDisplayName(_firstNameController.text.trim());
 
-      addUserDetails(displayName, _firstNameController.text.trim(),
-          _lastNameController.text.trim(), _emailController.text.trim());
+        addUserDetails(
+          displayName,
+          _firstNameController.text.trim(),
+          _lastNameController.text.trim(),
+          _emailController.text.trim(),
+        );
 
-      // ignore: use_build_context_synchronously
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const LoggedInHomePage()),
-      );
+        // ignore: use_build_context_synchronously
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const LoggedInHomePage()),
+        );
+      } else {
+        Navigator.pop(context);
+        return passwordsMatchMessage();
+      }
     } on FirebaseAuthException catch (e) {
       Navigator.pop(context);
 
@@ -77,9 +86,6 @@ class _RegisterPageState extends State<RegisterPage> {
         emptyEmailMessage();
       } else if (_passwordController.text.trim().isEmpty) {
         emptyPasswordMessage();
-      } else if (_passwordController.text.trim() !=
-          _confirmPasswordController.text.trim()) {
-        passwordsMatchMessage();
       } else if (e.code == 'email-already-in-use') {
         emailInUseMessage();
       } else if (e.code == 'weak-password') {
@@ -90,14 +96,26 @@ class _RegisterPageState extends State<RegisterPage> {
     }
   }
 
-  Future addUserDetails(String displayName, String firstName, String lastName,
-      String email) async {
+  bool passwordMatchs() {
+    if (_passwordController.text.trim() ==
+        _confirmPasswordController.text.trim()) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  Future addUserDetails(
+      String displayName, String firstName, String lastName, String email,
+      [customUsername]) async {
     String uid = FirebaseAuth.instance.currentUser?.uid ?? '';
     await FirebaseFirestore.instance.collection('users').doc(uid).set({
       'display name': displayName,
       'first name': firstName,
       'last name': lastName,
+      'full name': firstName + lastName,
       'email': email,
+      'custom username': customUsername,
     });
   }
 

@@ -1,42 +1,49 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:np_app/backend/tasks(all)/provider/taskproviders/radio_provider.dart';
+
+import '../provider/taskproviders/task_providers.dart';
 
 class RadioWidget extends ConsumerWidget {
   const RadioWidget({
-    super.key,
+    Key? key,
     required this.categColor,
     required this.titleRadio,
     required this.valueInput,
-    required this.onChangeValue,
-  });
+  }) : super(key: key);
 
-  final String titleRadio;
   final Color categColor;
-  final int valueInput;
-  final VoidCallback onChangeValue;
+  final String titleRadio;
+  final String valueInput;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final radio = ref.watch(radioProvider);
-    return Material(
-      child: Theme(
-        data: ThemeData(unselectedWidgetColor: Colors.green),
-        child: RadioListTile(
-          activeColor: categColor,
-          contentPadding: EdgeInsets.zero,
-          title: Transform.translate(
+    final category = ref.watch(categoryProvider);
+
+    return DropdownButton<String>(
+      value: category,
+      items: [
+        DropdownMenuItem(
+          value: category,
+          child: ListTile(
+            title: Transform.translate(
               offset: const Offset(-22, 0),
               child: Text(
                 titleRadio,
                 style:
                     TextStyle(color: categColor, fontWeight: FontWeight.w700),
-              )),
-          value: valueInput,
-          groupValue: radio,
-          onChanged: (value) => onChangeValue(),
+              ),
+            ),
+          ),
         ),
-      ),
+      ],
+      onChanged: (value) {
+        ref.read(categoryProvider.notifier).update((state) => category);
+        valueInput;
+      },
+      underline: const SizedBox(), // Remove the underline
+      isExpanded: true, // Make the dropdown menu expand to fit the content
+      hint: const SizedBox
+          .shrink(), // Hide the hint text when a value is selected
     );
   }
 }

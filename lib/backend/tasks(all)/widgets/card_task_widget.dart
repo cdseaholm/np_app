@@ -1,11 +1,9 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:np_app/backend/tasks(all)/provider/taskproviders/service_provider.dart';
-
-import '../../auth_pages/auth_provider.dart';
 
 class CardToolListWidget extends ConsumerWidget {
   const CardToolListWidget({required this.getIndex, Key? key})
@@ -18,9 +16,6 @@ class CardToolListWidget extends ConsumerWidget {
     Color categoryColor = Colors.white;
 
     final todoData = ref.watch(fetchDataProvider);
-    if (kDebugMode) {
-      print('todoData: $todoData');
-    }
     return todoData.when(
       data: (todoData) {
         final getCategory = todoData[getIndex].category;
@@ -69,13 +64,9 @@ class CardToolListWidget extends ConsumerWidget {
                           size: 20,
                         ),
                         onPressed: () {
-                          final userID = ref.read(authStateProvider).maybeWhen(
-                                data: (user) => user?.uid,
-                                orElse: () => null,
-                              );
-                          ref
-                              .read(serviceProvider)
-                              .deleteTask(userID!, todoData[getIndex].docID);
+                          final userID = FirebaseAuth.instance.currentUser?.uid;
+                          ref.read(serviceProvider).deleteTask(
+                              userID!, todoData[getIndex].docID, getCategory);
                         },
                       ),
                       title: Text(
@@ -99,13 +90,11 @@ class CardToolListWidget extends ConsumerWidget {
                           // ignore: avoid_print
                           onChanged: (value) {
                             final userID =
-                                ref.read(authStateProvider).maybeWhen(
-                                      data: (user) => user?.uid,
-                                      orElse: () => null,
-                                    );
+                                FirebaseAuth.instance.currentUser?.uid;
                             ref.read(serviceProvider).updateTask(
                                   userID!,
                                   todoData[getIndex].docID,
+                                  getCategory,
                                   value,
                                 );
                           },
@@ -140,6 +129,60 @@ class CardToolListWidget extends ConsumerWidget {
       ),
       loading: () => const Center(
         child: CircularProgressIndicator(),
+      ),
+    );
+  }
+}
+
+class DisplayTask extends ConsumerWidget {
+  const DisplayTask({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final todoData = ref.watch(fetchDataProvider);
+    return SingleChildScrollView(
+      child: ListView.builder(
+        itemCount: todoData.value?.length ?? 0,
+        shrinkWrap: true,
+        itemBuilder: (context, index) => CardToolListWidget(getIndex: index),
+      ),
+    );
+  }
+}
+
+class DisplayDefaultTask extends ConsumerWidget {
+  const DisplayDefaultTask({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Container(
+      alignment: Alignment.center,
+      margin: const EdgeInsets.symmetric(vertical: 4),
+      width: double.infinity,
+      height: 120,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.black, width: 1.5),
+      ),
+      child: const Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(
+            'Create a Task to see it here!',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          Text(
+            "Click '+ New Task' above to get started",
+            style: TextStyle(fontSize: 15),
+            textAlign: TextAlign.center,
+          )
+        ],
       ),
     );
   }

@@ -7,3 +7,11 @@ final dateProvider = StateProvider<String>((ref) {
 final timeProvider = StateProvider<String>((ref) {
   return 'hh : mm';
 });
+
+final categoryProvider = StateProvider<String>((ref) {
+  return "Select Category";
+});
+
+final repeatingProvider = StateProvider<String>((ref) {
+  return 'Repeating?';
+});

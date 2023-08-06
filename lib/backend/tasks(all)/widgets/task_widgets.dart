@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:gap/gap.dart';
-
-import 'constants/app_style.dart';
+import 'constants/constants.dart';
 
 class DateTimeWidget extends ConsumerWidget {
   const DateTimeWidget({
@@ -24,15 +23,15 @@ class DateTimeWidget extends ConsumerWidget {
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text(
           titleText,
-          style: AppStyle.headingOne,
+          style: AppStyle.headingTwo,
         ),
         const Gap(6),
         Material(
           child: Ink(
             decoration: BoxDecoration(
-              color: Colors.grey.shade200,
-              borderRadius: BorderRadius.circular(10),
-            ),
+                color: Colors.grey.shade200,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: Colors.black, width: .5)),
             child: InkWell(
               borderRadius: BorderRadius.circular(10),
               onTap: () => onTap(),
@@ -56,5 +55,14 @@ class DateTimeWidget extends ConsumerWidget {
         ),
       ]),
     );
+  }
+}
+
+class RepeatingWidget extends ConsumerWidget {
+  const RepeatingWidget({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    throw UnimplementedError();
   }
 }

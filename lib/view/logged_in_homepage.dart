@@ -1,18 +1,16 @@
-import 'dart:async';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:np_app/view/main_user_views/profile_page.dart';
+import 'package:np_app/backend/update_profile_all/profile_page.dart';
 
 import '../../backend/widget/botnavbar_widget.dart';
-import '../../services/sign_out_service.dart';
+import '../../backend/widget/display_name_widget.dart';
 import '../../backend/tasks(all)/task.dart';
 import 'calendarpage.dart';
 import 'communitypage.dart';
 import 'goalspage.dart';
+import 'logged_out_homepage.dart';
 import 'statisticspage.dart';
 
 class LoggedInHomePage extends ConsumerStatefulWidget {
@@ -28,38 +26,10 @@ class _LoggedInHomePageState extends ConsumerState<LoggedInHomePage> {
   late ValueChanged<int> onTappedbar;
   late PageController _pageController;
   final user = FirebaseAuth.instance.currentUser!;
-  String userDisplayName = '';
-  StreamSubscription<User?>? _authStateChangesListener;
-
-  List<String> docIDs = [];
-
-  Future getDocId() async {
-    await FirebaseFirestore.instance.collection('users').get().then(
-          // ignore: avoid_function_literals_in_foreach_calls
-          (snapshot) => snapshot.docs.forEach((document) {
-            // ignore: avoid_print
-            print(document.reference);
-            docIDs.add(document.reference.id);
-          }),
-        );
-  }
 
   @override
   void initState() {
     super.initState();
-    getDocId();
-    _authStateChangesListener =
-        FirebaseAuth.instance.authStateChanges().listen((User? user) {
-      if (user != null) {
-        setState(() {
-          userDisplayName = user.displayName ?? '';
-        });
-      } else {
-        setState(() {
-          userDisplayName = 'Your Progress';
-        });
-      }
-    });
 
     _currentIndex = 0;
     _pageController = PageController(initialPage: _currentIndex);
@@ -67,7 +37,6 @@ class _LoggedInHomePageState extends ConsumerState<LoggedInHomePage> {
 
   @override
   void dispose() {
-    _authStateChangesListener?.cancel();
     _pageController
         .dispose(); // Dispose the _pageController when no longer needed
     super.dispose();
@@ -122,20 +91,19 @@ class _LoggedInHomePageState extends ConsumerState<LoggedInHomePage> {
               toolbarHeight: MediaQuery.of(context).size.height / 12,
               backgroundColor: const Color.fromARGB(255, 76, 119, 85),
               elevation: 0,
-              title: ListTile(
-                leading: const CircleAvatar(
-                  backgroundColor: Color.fromARGB(255, 255, 255, 255),
-                  radius: 25,
-                  child: Text(
-                    'NP',
-                    style: TextStyle(
-                        color: Color.fromARGB(255, 0, 0, 0), fontSize: 20),
+              title: const ListTile(
+                  leading: CircleAvatar(
+                    backgroundColor: Color.fromARGB(255, 255, 255, 255),
+                    radius: 25,
+                    child: Text(
+                      'NP',
+                      style: TextStyle(
+                          color: Color.fromARGB(255, 0, 0, 0), fontSize: 20),
+                    ),
                   ),
-                ),
-                title: Text(
-                  "$userDisplayName's Progress",
-                ),
-              ),
+                  title: Center(
+                    child: HomeDisplayNameWidget(),
+                  )),
               actions: [
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -151,27 +119,38 @@ class _LoggedInHomePageState extends ConsumerState<LoggedInHomePage> {
                         itemBuilder: (BuildContext context) {
                           return <PopupMenuEntry<String>>[
                             PopupMenuItem<String>(
-                              child: GestureDetector(
-                                onTap: () => showModalBottomSheet(
-                                  isScrollControlled: true,
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(16)),
-                                  context: context,
-                                  builder: (context) => const ProfilePage(),
+                              child: MaterialButton(
+                                onPressed: () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const ProfilePage(),
+                                  ),
                                 ),
                                 child: const Text('Profile'),
                               ),
                             ),
                             PopupMenuItem<String>(
-                              child: GestureDetector(
-                                onTap: () => AuthSignOut().signOut(context),
+                              child: MaterialButton(
+                                onPressed: () {
+                                  FirebaseAuth.instance.signOut();
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (_) =>
+                                            const LoggedOutHomePage()),
+                                  );
+                                },
                                 child: const Text('Logout'),
                               ),
                             ),
-                            const PopupMenuItem<String>(
-                              value: 'close',
-                              child: Text('close'),
-                            ),
+                            PopupMenuItem<String>(
+                              child: MaterialButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                                child: const Text('Close'),
+                              ),
+                            )
                           ];
                         },
                       ),

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:np_app/backend/auth_pages/authviews/user_regist_screen.dart';
 import 'package:snippet_coder_utils/hex_color.dart';
 
-import '../../../view/main_user_views/logged_out_homepage.dart';
+import '../../../view/logged_out_homepage.dart';
 import '../allthings_login/login_screen.dart';
 
 class ForgotPassword extends StatefulWidget {
@@ -376,7 +376,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  "Forgot Password",
+                  "Password Reset",
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25),
                 ),
               ],

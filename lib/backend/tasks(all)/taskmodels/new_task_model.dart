@@ -1,20 +1,18 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
-import 'package:np_app/backend/tasks(all)/widgets/constants/app_style.dart';
-import 'package:np_app/backend/models/todo_model.dart';
-import 'package:np_app/backend/tasks(all)/widgets/date_time_widget.dart';
-import 'package:np_app/backend/tasks(all)/widgets/radio_widget.dart';
-import 'package:np_app/backend/tasks(all)/provider/taskproviders/date_time_provider.dart';
-import 'package:np_app/backend/tasks(all)/provider/taskproviders/radio_provider.dart';
+import 'package:np_app/backend/tasks(all)/widgets/constants/constants.dart';
+import 'package:np_app/backend/tasks(all)/taskmodels/todo_model.dart';
+import 'package:np_app/backend/tasks(all)/widgets/task_widgets.dart';
+import 'package:np_app/backend/tasks(all)/provider/taskproviders/task_providers.dart';
 import 'package:np_app/backend/tasks(all)/provider/taskproviders/service_provider.dart';
 import 'package:snippet_coder_utils/hex_color.dart';
 
-import 'widgets/textfield_widget.dart';
+import '../widgets/category_widget.dart';
+import '../widgets/textfield_widget.dart';
 
 class AddNewTaskModel extends ConsumerStatefulWidget {
   const AddNewTaskModel({
@@ -29,6 +27,14 @@ class AddNewTaskModel extends ConsumerStatefulWidget {
 class _AddNewTaskModelState extends ConsumerState<AddNewTaskModel> {
   final titleController = TextEditingController();
   final descriptionController = TextEditingController();
+  String selectedCategory = 'Select Category';
+  late final Function(String) onCategorySelected;
+  List<Category> categories = [
+    Category(color: Colors.green, name: 'LRN', value: ''),
+    Category(color: Colors.blue.shade700, name: 'WRK', value: ''),
+    Category(color: Colors.amberAccent.shade700, name: 'GEN', value: ''),
+  ];
+  Color selectedColor = Colors.transparent;
 
   @override
   void initState() {
@@ -44,18 +50,19 @@ class _AddNewTaskModelState extends ConsumerState<AddNewTaskModel> {
     super.dispose();
   }
 
+  void updateCategory(String category, Color color) {
+    setState(() {
+      selectedCategory = category;
+      selectedColor = color;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final dateProv = ref.watch(dateProvider);
     final uID = FirebaseAuth.instance.currentUser?.uid;
-    if (kDebugMode) {
-      print('uID: $uID');
-    }
 
     if (uID == null) {
-      if (kDebugMode) {
-        print('User is not signed in');
-      }
       showDialog(
         context: context,
         builder: (context) {
@@ -84,7 +91,7 @@ class _AddNewTaskModelState extends ConsumerState<AddNewTaskModel> {
 
     return Container(
         padding: const EdgeInsets.all(30),
-        height: MediaQuery.of(context).size.height * 0.75,
+        height: MediaQuery.of(context).size.height * 0.8,
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
@@ -125,38 +132,12 @@ class _AddNewTaskModelState extends ConsumerState<AddNewTaskModel> {
             txtController: descriptionController,
           ),
           const Gap(12),
-          const Text('Category', style: AppStyle.headingOne),
-          Row(
-            children: [
-              Expanded(
-                child: RadioWidget(
-                  categColor: Colors.green,
-                  titleRadio: 'LRN',
-                  valueInput: 1,
-                  onChangeValue: () =>
-                      ref.read(radioProvider.notifier).update((state) => 1),
-                ),
-              ),
-              Expanded(
-                child: RadioWidget(
-                  categColor: Colors.blue.shade700,
-                  titleRadio: 'WRK',
-                  valueInput: 2,
-                  onChangeValue: () =>
-                      ref.read(radioProvider.notifier).update((state) => 2),
-                ),
-              ),
-              Expanded(
-                child: RadioWidget(
-                  categColor: Colors.amberAccent.shade700,
-                  titleRadio: 'GEN',
-                  valueInput: 3,
-                  onChangeValue: () =>
-                      ref.read(radioProvider.notifier).update((state) => 3),
-                ),
-              ),
-            ],
+
+          const Divider(
+            thickness: 1,
+            color: Colors.black,
           ),
+
           // Date and Time Section
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -198,6 +179,25 @@ class _AddNewTaskModelState extends ConsumerState<AddNewTaskModel> {
               ),
             ],
           ),
+          const Gap(12),
+
+          //Category, Repeat
+
+          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+            CategoryWidget(
+              // Pass the callback function to CategoryFramework
+              categories: categories,
+              onCategorySelected: updateCategory,
+              selectedCategory: selectedCategory,
+              selectedColor: selectedColor,
+            ),
+            const Gap(22),
+            DateTimeWidget(
+                titleText: 'Should this repeat?',
+                valueText: ref.watch(repeatingProvider),
+                iconSection: CupertinoIcons.arrow_counterclockwise,
+                onTap: () async {}),
+          ]),
 
           //Button Section
 
@@ -233,38 +233,27 @@ class _AddNewTaskModelState extends ConsumerState<AddNewTaskModel> {
                       ),
                       padding: const EdgeInsets.symmetric(vertical: 14),
                     ),
-                    onPressed: () {
-                      final getRadioValue = ref.read(radioProvider);
-                      String category = '';
-
-                      switch (getRadioValue) {
-                        case 1:
-                          category = 'Learning';
-                          break;
-                        case 2:
-                          category = 'Working';
-                          break;
-                        case 3:
-                          category = 'General';
-                          break;
-                      }
-
+                    onPressed: () async {
                       final toDoModel = ToDoModel(
                           titleTask: titleController.text.trim(),
                           description: descriptionController.text.trim(),
-                          category: category,
+                          category: ref.read(categoryProvider),
                           dateTask: ref.read(dateProvider),
                           timeTask: ref.read(timeProvider),
                           isDone: false);
 
-                      ref.read(serviceProvider).addNewTask(toDoModel, uID!);
+                      ref
+                          .read(serviceProvider)
+                          .addNewTask(toDoModel, uID!, selectedCategory);
 
                       // ignore: avoid_print
                       print('Data is saving');
 
                       titleController.clear();
                       descriptionController.clear();
-                      ref.read(radioProvider.notifier).update((state) => 0);
+                      ref
+                          .read(categoryProvider.notifier)
+                          .update((state) => 'Select Category');
                       ref
                           .read(dateProvider.notifier)
                           .update((state) => 'mm / dd / yy');
