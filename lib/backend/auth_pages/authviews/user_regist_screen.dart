@@ -7,6 +7,7 @@ import 'package:snippet_coder_utils/hex_color.dart';
 
 import '../../../view/logged_in_homepage.dart';
 import '../../../view/logged_out_homepage.dart';
+
 import '../allthings_login/login_screen.dart';
 
 class RegisterPage extends StatefulWidget {

@@ -47,7 +47,9 @@ class DateTimeWidget extends ConsumerWidget {
                 child: Row(children: [
                   Icon(iconSection),
                   const Gap(6),
-                  Text(valueText),
+                  Text(
+                    valueText,
+                  ),
                 ]),
               ),
             ),

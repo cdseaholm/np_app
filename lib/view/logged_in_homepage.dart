@@ -59,7 +59,7 @@ class _LoggedInHomePageState extends ConsumerState<LoggedInHomePage> {
                   });
                 },
                 children: const [
-                  Center(child: SafeArea(child: Tasks())),
+                  SafeArea(child: Tasks()),
                   Calendar(),
                   Stats(),
                   Community(),

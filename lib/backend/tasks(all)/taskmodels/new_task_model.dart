@@ -5,13 +5,11 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
 import 'package:np_app/backend/tasks(all)/widgets/constants/constants.dart';
-import 'package:np_app/backend/tasks(all)/taskmodels/todo_model.dart';
+import 'package:np_app/backend/tasks(all)/taskmodels/task_model.dart';
 import 'package:np_app/backend/tasks(all)/widgets/task_widgets.dart';
 import 'package:np_app/backend/tasks(all)/provider/taskproviders/task_providers.dart';
 import 'package:np_app/backend/tasks(all)/provider/taskproviders/service_provider.dart';
-import 'package:snippet_coder_utils/hex_color.dart';
-
-import '../widgets/category_widget.dart';
+import '../widgets/category_widget_all/category_widget.dart';
 import '../widgets/textfield_widget.dart';
 
 class AddNewTaskModel extends ConsumerStatefulWidget {
@@ -27,14 +25,6 @@ class AddNewTaskModel extends ConsumerStatefulWidget {
 class _AddNewTaskModelState extends ConsumerState<AddNewTaskModel> {
   final titleController = TextEditingController();
   final descriptionController = TextEditingController();
-  String selectedCategory = 'Select Category';
-  late final Function(String) onCategorySelected;
-  List<Category> categories = [
-    Category(color: Colors.green, name: 'LRN', value: ''),
-    Category(color: Colors.blue.shade700, name: 'WRK', value: ''),
-    Category(color: Colors.amberAccent.shade700, name: 'GEN', value: ''),
-  ];
-  Color selectedColor = Colors.transparent;
 
   @override
   void initState() {
@@ -50,24 +40,16 @@ class _AddNewTaskModelState extends ConsumerState<AddNewTaskModel> {
     super.dispose();
   }
 
-  void updateCategory(String category, Color color) {
-    setState(() {
-      selectedCategory = category;
-      selectedColor = color;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     final dateProv = ref.watch(dateProvider);
     final uID = FirebaseAuth.instance.currentUser?.uid;
-
     if (uID == null) {
       showDialog(
         context: context,
         builder: (context) {
           return AlertDialog(
-              backgroundColor: HexColor("#456B4C"),
+              backgroundColor: Colors.white,
               title: const Center(
                 child: Text(
                   'Sign in to add new Tasks',
@@ -154,7 +136,7 @@ class _AddNewTaskModelState extends ConsumerState<AddNewTaskModel> {
                       lastDate: DateTime(2025));
 
                   if (getValue != null) {
-                    final format = DateFormat.yMMMEd();
+                    final format = DateFormat.yMEd();
                     ref
                         .read(dateProvider.notifier)
                         .update((state) => format.format(getValue));
@@ -185,12 +167,8 @@ class _AddNewTaskModelState extends ConsumerState<AddNewTaskModel> {
 
           Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
             CategoryWidget(
-              // Pass the callback function to CategoryFramework
-              categories: categories,
-              onCategorySelected: updateCategory,
-              selectedCategory: selectedCategory,
-              selectedColor: selectedColor,
-            ),
+                selectedCategoryColor: ref.read(categoryColorRadioProvider),
+                selectedCategoryName: ref.read(categoryNameRadioProvider)),
             const Gap(22),
             DateTimeWidget(
                 titleText: 'Should this repeat?',
@@ -216,7 +194,21 @@ class _AddNewTaskModelState extends ConsumerState<AddNewTaskModel> {
                     ),
                     padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () {
+                    titleController.clear();
+                    descriptionController.clear();
+
+                    ref
+                        .read(categoryNameRadioProvider.notifier)
+                        .update((state) => 'Select Category');
+                    ref
+                        .read(dateProvider.notifier)
+                        .update((state) => 'mm / dd / yy');
+                    ref
+                        .read(timeProvider.notifier)
+                        .update((state) => 'hh : mm');
+                    Navigator.pop(context);
+                  },
                   child: const Text('Cancel'),
                 ),
               ),
@@ -234,25 +226,35 @@ class _AddNewTaskModelState extends ConsumerState<AddNewTaskModel> {
                       padding: const EdgeInsets.symmetric(vertical: 14),
                     ),
                     onPressed: () async {
-                      final toDoModel = ToDoModel(
-                          titleTask: titleController.text.trim(),
-                          description: descriptionController.text.trim(),
-                          category: ref.read(categoryProvider),
-                          dateTask: ref.read(dateProvider),
-                          timeTask: ref.read(timeProvider),
-                          isDone: false);
+                      final toDoModel = TaskModel(
+                        taskTitle: titleController.text.trim(),
+                        description: descriptionController.text.trim(),
+                        category: ref.read(categoryNameRadioProvider),
+                        dateTask: ref.read(dateProvider),
+                        timeTask: ref.read(timeProvider),
+                        isDone: false,
+                      );
 
-                      ref
-                          .read(serviceProvider)
-                          .addNewTask(toDoModel, uID!, selectedCategory);
+                      final uID = FirebaseAuth.instance.currentUser?.uid;
+                      var categoryID =
+                          'Category: ${ref.read(categoryNameRadioProvider)}';
+
+                      if (uID != null && categoryID != 'Select Category') {
+                        ref.read(serviceProvider).addNewTask(
+                              toDoModel,
+                              uID,
+                              categoryID,
+                            );
+                      }
 
                       // ignore: avoid_print
                       print('Data is saving');
 
                       titleController.clear();
                       descriptionController.clear();
+
                       ref
-                          .read(categoryProvider.notifier)
+                          .read(categoryNameRadioProvider.notifier)
                           .update((state) => 'Select Category');
                       ref
                           .read(dateProvider.notifier)

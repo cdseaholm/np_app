@@ -7,6 +7,7 @@
         -different views?
         -different states (incomplete, complete, overdue, deleted(save for 7 days?))
         -fix gmail Namesstates
+        -allow color to pass to field
     splash screen?
     work on profile
         -(pushs) having backs

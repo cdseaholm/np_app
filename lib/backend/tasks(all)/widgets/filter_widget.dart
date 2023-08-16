@@ -6,18 +6,15 @@ class CustomFilterButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final taskFilterByList = [
+      'All',
       'Category',
       'Date',
       'Overdue',
-      'Incomplete',
       'Upcoming',
     ];
 
     return PopupMenuButton<String>(
-      onSelected: (String filterBy) {
-        // Handle the selected filter option
-        // You can call a function to filter tasks based on the selected option.
-      },
+      onSelected: (String filterBy) {},
       itemBuilder: (context) {
         return taskFilterByList.map((filterBy) {
           return PopupMenuItem<String>(

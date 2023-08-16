@@ -22,11 +22,8 @@ final userFieldsProvider = StreamProvider.autoDispose<CredModel?>((ref) {
         .snapshots()
         .map((snapshot) => CredModel.fromSnapshot(snapshot));
 
-    final subscription = getUserData.listen((credModel) {
-      // The credModel has been updated with new data
-    });
+    final subscription = getUserData.listen((credModel) {});
 
-    // Dispose the subscription when the provider is no longer used
     ref.onDispose(() => subscription.cancel());
 
     return getUserData;

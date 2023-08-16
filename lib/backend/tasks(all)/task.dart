@@ -13,7 +13,7 @@ class Tasks extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final todoData = ref.watch(fetchDataProvider);
+    loadTaskData();
     return Scaffold(
         backgroundColor: Colors.grey.shade200,
         body: SingleChildScrollView(
@@ -74,10 +74,7 @@ class Tasks extends ConsumerWidget {
                         ),
                       ]),
                   const Gap(20),
-                  if (todoData.value != null && todoData.value!.isNotEmpty)
-                    const DisplayTask()
-                  else
-                    const DisplayDefaultTask()
+                  const DisplayTask()
                 ]))));
   }
 }

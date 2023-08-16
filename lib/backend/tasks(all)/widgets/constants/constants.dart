@@ -40,3 +40,14 @@ class DropDownAnimationArrow {
 
   void dispose() {}
 }
+
+/*
+
+void changeColor(Color color) {
+    setState(() {
+      pickerColor = color;
+      model.colorHex = colorToHex(color);
+    });
+  }
+
+  */
