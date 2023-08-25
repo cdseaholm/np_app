@@ -48,22 +48,25 @@ class GoogleAuthService {
         MaterialPageRoute(builder: (_) => const LoggedInHomePage()),
       );
     } on FirebaseAuthException catch (e) {
-      if (e.code == 'account-exists-with-different-credential') {
-        showErrorMessage(context, 'Account Exists with different credentials');
-      } else if (e.code == 'invalid-credential') {
-        showErrorMessage(context, 'Invalid Credential');
-      } else if (e.code == 'user-disabled') {
-        showErrorMessage(context, 'User disabled');
-      } else if (e.code == 'user-not-found') {
-        showErrorMessage(context, 'User not found');
-      } else if (e.code == 'wrong-password') {
-        showErrorMessage(context, 'Incorrect Password');
-      } else if (e.code == 'invalid-verification-code') {
-        showErrorMessage(context, 'Invalid Verification Code');
-      } else if (e.code == 'invalid-verification-id') {
-        showErrorMessage(context, 'Invalid ID');
-      } else {
-        showErrorMessage(context, 'Unknown error occurred');
+      if (context.mounted) {
+        if (e.code == 'account-exists-with-different-credential') {
+          showErrorMessage(
+              context, 'Account Exists with different credentials');
+        } else if (e.code == 'invalid-credential') {
+          showErrorMessage(context, 'Invalid Credential');
+        } else if (e.code == 'user-disabled') {
+          showErrorMessage(context, 'User disabled');
+        } else if (e.code == 'user-not-found') {
+          showErrorMessage(context, 'User not found');
+        } else if (e.code == 'wrong-password') {
+          showErrorMessage(context, 'Incorrect Password');
+        } else if (e.code == 'invalid-verification-code') {
+          showErrorMessage(context, 'Invalid Verification Code');
+        } else if (e.code == 'invalid-verification-id') {
+          showErrorMessage(context, 'Invalid ID');
+        } else {
+          showErrorMessage(context, 'Unknown error occurred');
+        }
       }
     }
   }

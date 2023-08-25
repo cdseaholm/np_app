@@ -1,3 +1,135 @@
+
+
+
+/*
+
+iterable back up: 
+
+/*
+Iterable try: 
+
+Iterable<UserCreatedCategoryModel> parseCategories(List<Map<String, dynamic>> rawData) {
+  return rawData.map((categoryData) => UserCreatedCategoryModel(
+        categoryID: categoryData['categoryID'],
+        categoryName: categoryData['categoryName'],
+        colorHex: categoryData['colorHex'],
+      ));
+}
+
+
+
+final fetchCategories =
+    StreamProvider<List<UserCreatedCategoryModel>>((ref) {
+  final userID = ref.watch(authStateProvider).maybeWhen(
+        data: (user) => user?.uid,
+        orElse: () => null,
+      );
+  if (userID != null) {
+    final categoryCollection = FirebaseFirestore.instance
+        .collection('users')
+        .doc(userID)
+        .collection('Categories')
+        .snapshots()
+        .map((event) => event.docs
+            .map((snapshot) => snapshot.data()))
+            .toList();
+
+    if (kDebugMode) {
+      print('Catsnapshots: $categoryCollection');
+    }
+    
+    final parsedCategories = parseCategories(categoryCollection.);
+    return Stream.value(parsedCategories);
+  } else {
+    return Stream.value([]);
+  }
+});
+*/
+
+
+
+final fetchDataProvider =
+    StreamProvider.autoDispose<List<TaskModel>>((ref) async* {
+  final categoryModel = ref.watch(categoryModelProvider);
+  final categoryID = categoryModel.categoryID;
+  final userID = ref.watch(authStateProvider).maybeWhen(
+        data: (user) => user?.uid,
+        orElse: () => null,
+      );
+
+  if (userID != null) {
+    final tasksCollection = FirebaseFirestore.instance
+        .collection('users')
+        .doc(userID)
+        .collection('Categories')
+        .doc(categoryID)
+        .collection('Tasks')
+        .snapshots()
+        .map((event) => event.docs
+            .map((snapshot) => TaskModel.fromSnapshot(snapshot))
+            .toList());
+
+    tasksCollection.listen((tasks) {
+      if (kDebugMode) {
+        print('Categories: $tasks');
+      }
+      if (kDebugMode) {
+        print("categoryID: $categoryID");
+      }
+    });
+    yield* tasksCollection;
+  } else {
+    yield [];
+  }
+});
+*/
+
+/* CardToolListWidget backup
+Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Consumer(builder: (context, ref, _) {
+  final userID = FirebaseAuth.instance.currentUser?.uid;
+  final toDoService = ref.watch(serviceProvider);
+                    return StreamBuilder<List<UserCreatedCategoryModel?>>(
+                      stream: loadCategoryData(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return const CircularProgressIndicator();
+                        } else if (snapshot.hasError) {
+                          return Text('Error: ${snapshot.error}');
+                        } else if (!snapshot.hasData) {
+                          return const DisplayDefaultTask();
+                        }
+                  
+                        final categories = snapshot.data!;
+                        final todoDataList = categories.map((category) {
+                          return toDoService.loadTaskData(userID!, category!.categoryID);
+                        }).toList();
+                        return ListView.builder(
+        itemCount: categories.length,
+        itemBuilder: (context, index) {
+          final category = categories[index];
+          final todoData = todoDataList[index];
+                        return StreamBuilder<List<TaskModel?>>(
+            stream: todoData,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const CircularProgressIndicator();
+              } else if (snapshot.hasError) {
+                return Text('Error: ${snapshot.error}');
+              } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                return const DisplayDefaultTask();
+              }
+
+              final tasks = snapshot.data!;
+
+*/
+
+
+
 FormHelper.inputFieldWidget(
             context,
             "username",

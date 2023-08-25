@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:np_app/backend/auth_pages/alert_messages.dart';
 import 'package:snippet_coder_utils/hex_color.dart';
 
 import '../../../view/logged_in_homepage.dart';
@@ -76,23 +77,25 @@ class _RegisterPageState extends State<RegisterPage> {
         );
       } else {
         Navigator.pop(context);
-        return passwordsMatchMessage();
+        return RegisterMessages().passwordsMatchMessage(context);
       }
     } on FirebaseAuthException catch (e) {
-      Navigator.pop(context);
+      if (context.mounted) {
+        Navigator.pop(context);
 
-      if (_firstNameController.text.trim().isEmpty) {
-        emptyFirstNameMessage();
-      } else if (_emailController.text.trim().isEmpty) {
-        emptyEmailMessage();
-      } else if (_passwordController.text.trim().isEmpty) {
-        emptyPasswordMessage();
-      } else if (e.code == 'email-already-in-use') {
-        emailInUseMessage();
-      } else if (e.code == 'weak-password') {
-        weakPasswordMessage();
-      } else if (e.code == 'invalid-email') {
-        invalidEmailMessage();
+        if (_firstNameController.text.trim().isEmpty) {
+          RegisterMessages().emptyFirstNameMessage(context);
+        } else if (_emailController.text.trim().isEmpty) {
+          RegisterMessages().emptyEmailMessage(context);
+        } else if (_passwordController.text.trim().isEmpty) {
+          RegisterMessages().emptyPasswordMessage(context);
+        } else if (e.code == 'email-already-in-use') {
+          RegisterMessages().emailInUseMessage(context);
+        } else if (e.code == 'weak-password') {
+          RegisterMessages().weakPasswordMessage(context);
+        } else if (e.code == 'invalid-email') {
+          RegisterMessages().invalidEmailMessage(context);
+        }
       }
     }
   }
@@ -118,202 +121,6 @@ class _RegisterPageState extends State<RegisterPage> {
       'email': email,
       'custom username': customUsername,
     });
-  }
-
-  //emptyFirstName
-  void emptyFirstNameMessage() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-            backgroundColor: HexColor("#456B4C"),
-            title: const Center(
-              child: Text(
-                'First Name cannot be empty',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text(
-                  'Back',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            ]);
-      },
-    );
-  }
-
-  //emptyEmail
-  void emptyEmailMessage() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-            backgroundColor: HexColor("#456B4C"),
-            title: const Center(
-              child: Text(
-                'Email cannot be empty',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text(
-                  'Back',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            ]);
-      },
-    );
-  }
-
-  //emptyPassword
-  void emptyPasswordMessage() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-            backgroundColor: HexColor("#456B4C"),
-            title: const Center(
-              child: Text(
-                'Password cannot be empty',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text(
-                  'Back',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            ]);
-      },
-    );
-  }
-
-  //passwords match message
-  void passwordsMatchMessage() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-            backgroundColor: HexColor("#456B4C"),
-            title: const Center(
-              child: Text(
-                'The Password and Confirm Password must match',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text(
-                  'Back',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            ]);
-      },
-    );
-  }
-
-  // email in use message
-  void emailInUseMessage() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-            backgroundColor: HexColor("#456B4C"),
-            title: const Center(
-              child: Text(
-                'This Email is in use already',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text(
-                  'Back',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            ]);
-      },
-    );
-  }
-
-  //weak password
-  void weakPasswordMessage() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-            backgroundColor: HexColor("#456B4C"),
-            title: const Center(
-              child: Text(
-                'Password is too weak, it must be at least 6 characters long',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text(
-                  'Back',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            ]);
-      },
-    );
-  }
-
-  //invalid email
-  void invalidEmailMessage() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-            backgroundColor: HexColor("#456B4C"),
-            title: const Center(
-              child: Text(
-                'Email is Invalid',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text(
-                  'Back',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            ]);
-      },
-    );
   }
 
   @override

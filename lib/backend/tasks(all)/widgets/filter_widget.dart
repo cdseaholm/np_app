@@ -9,6 +9,8 @@ class CustomFilterButton extends StatelessWidget {
       'All',
       'Category',
       'Date',
+      'Newest -> Oldest',
+      'Oldest -> Newest',
       'Overdue',
       'Upcoming',
     ];

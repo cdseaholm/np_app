@@ -5,6 +5,7 @@ import 'package:snippet_coder_utils/hex_color.dart';
 
 import '../../../view/logged_in_homepage.dart';
 import '../../../view/logged_out_homepage.dart';
+import '../../tasks(all)/provider/taskproviders/service_provider.dart';
 import '../authviews/forgotpassword.dart';
 import '../authviews/user_regist_screen.dart';
 
@@ -18,6 +19,7 @@ class AuthPage extends ConsumerWidget {
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
+            ref.read(fetchCategoryTasks);
             return const LoggedInHomePage();
           } else {
             return const LoggedOutHomePage();
@@ -55,22 +57,24 @@ class LoginService {
         MaterialPageRoute(builder: (_) => const LoggedInHomePage()),
       );
     } on FirebaseAuthException catch (e) {
-      Navigator.pop(context);
+      if (context.mounted) {
+        Navigator.pop(context);
 
-      if (email.trim().isEmpty) {
-        showErrorMessage(context, 'Email cannot be empty');
-      } else if (password.trim().isEmpty) {
-        showErrorMessage(context, 'Password cannot be empty');
-      } else if (e.code == 'user-not-found') {
-        wrongEmailMessage(context);
-      } else if (e.code == 'wrong-password') {
-        wrongPasswordMessage(context);
-      } else if (e.code == 'user-disabled') {
-        showErrorMessage(context, 'User disabled');
-      } else if (e.code == 'invalid-email') {
-        showErrorMessage(context, 'Invalid email');
-      } else {
-        showErrorMessage(context, 'Unknown error occurred');
+        if (email.trim().isEmpty) {
+          showErrorMessage(context, 'Email cannot be empty');
+        } else if (password.trim().isEmpty) {
+          showErrorMessage(context, 'Password cannot be empty');
+        } else if (e.code == 'user-not-found') {
+          wrongEmailMessage(context);
+        } else if (e.code == 'wrong-password') {
+          wrongPasswordMessage(context);
+        } else if (e.code == 'user-disabled') {
+          showErrorMessage(context, 'User disabled');
+        } else if (e.code == 'invalid-email') {
+          showErrorMessage(context, 'Invalid email');
+        } else {
+          showErrorMessage(context, 'Unknown error occurred');
+        }
       }
     }
   }

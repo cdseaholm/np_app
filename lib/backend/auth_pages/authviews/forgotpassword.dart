@@ -67,24 +67,26 @@ class _ForgotPasswordState extends State<ForgotPassword> {
         },
       );
     } on FirebaseAuthException catch (e) {
-      Navigator.pop(context);
+      if (context.mounted) {
+        Navigator.pop(context);
 
-      if (_emailController.text.trim().isEmpty) {
-        emptyEmailMessage();
-      } else if (e.code == 'user-not-found') {
-        userNotFoundMessage();
-      } else if (e.code == 'unauthorized-continue-uri') {
-        unauthorizedURIMessage();
-      } else if (e.code == 'invalid-continue-uri') {
-        invalidURIMessage();
-      } else if (e.code == 'missing-ios-bundle-id') {
-        missingIOSIDMessage();
-      } else if (e.code == 'missing-continue-uri') {
-        missingURIMessage();
-      } else if (e.code == 'missing-android-pkg-name') {
-        missingAndroidPkgMessage();
-      } else if (e.code == 'invalid-email') {
-        invalidEmailMessage();
+        if (_emailController.text.trim().isEmpty) {
+          emptyEmailMessage();
+        } else if (e.code == 'user-not-found') {
+          userNotFoundMessage();
+        } else if (e.code == 'unauthorized-continue-uri') {
+          unauthorizedURIMessage();
+        } else if (e.code == 'invalid-continue-uri') {
+          invalidURIMessage();
+        } else if (e.code == 'missing-ios-bundle-id') {
+          missingIOSIDMessage();
+        } else if (e.code == 'missing-continue-uri') {
+          missingURIMessage();
+        } else if (e.code == 'missing-android-pkg-name') {
+          missingAndroidPkgMessage();
+        } else if (e.code == 'invalid-email') {
+          invalidEmailMessage();
+        }
       }
     }
   }

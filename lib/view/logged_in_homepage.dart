@@ -26,19 +26,18 @@ class _LoggedInHomePageState extends ConsumerState<LoggedInHomePage> {
   late ValueChanged<int> onTappedbar;
   late PageController _pageController;
   final user = FirebaseAuth.instance.currentUser!;
+  late List<bool> hideEditButtons;
 
   @override
   void initState() {
     super.initState();
-
     _currentIndex = 0;
     _pageController = PageController(initialPage: _currentIndex);
   }
 
   @override
   void dispose() {
-    _pageController
-        .dispose(); // Dispose the _pageController when no longer needed
+    _pageController.dispose();
     super.dispose();
   }
 
@@ -52,6 +51,7 @@ class _LoggedInHomePageState extends ConsumerState<LoggedInHomePage> {
             _loggedInHomeUI(context),
             Expanded(
               child: PageView(
+                physics: const NeverScrollableScrollPhysics(),
                 controller: _pageController,
                 onPageChanged: (index) {
                   setState(() {

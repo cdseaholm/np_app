@@ -4,11 +4,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class CredModel {
-  final String userID;
-  final String displayName;
-  final String email;
-  final String firstName;
-  final String lastName;
+  final String? userID;
+  final String? displayName;
+  final String? email;
+  final String? firstName;
+  final String? lastName;
   final String? fullName;
   final String? customUsername;
 

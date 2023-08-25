@@ -1,6 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import 'package:np_app/backend/tasks(all)/taskmodels/task_model.dart';
+
+final serviceProvider = StateProvider<ToDoService>((ref) {
+  return ToDoService();
+});
 
 class ToDoService {
   final users = FirebaseFirestore.instance.collection('users');
@@ -15,8 +20,7 @@ class ToDoService {
         .collection('Categories')
         .doc(categoryID)
         .collection('Tasks')
-        .doc()
-        .set(model.toJson());
+        .add(model.toJson());
   }
 
   // UPDATE

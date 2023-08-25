@@ -4,11 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
+import 'package:np_app/backend/tasks(all)/task_service.dart';
+import 'package:np_app/backend/tasks(all)/widgets/category_widget_all/category.model.dart';
 import 'package:np_app/backend/tasks(all)/widgets/constants/constants.dart';
 import 'package:np_app/backend/tasks(all)/taskmodels/task_model.dart';
 import 'package:np_app/backend/tasks(all)/widgets/task_widgets.dart';
 import 'package:np_app/backend/tasks(all)/provider/taskproviders/task_providers.dart';
-import 'package:np_app/backend/tasks(all)/provider/taskproviders/service_provider.dart';
+import '../provider/taskproviders/selected_category_providers.dart';
+import '../provider/taskproviders/service_provider.dart';
 import '../widgets/category_widget_all/category_widget.dart';
 import '../widgets/textfield_widget.dart';
 
@@ -92,7 +95,7 @@ class _AddNewTaskModelState extends ConsumerState<AddNewTaskModel> {
           ),
           Divider(
             thickness: 1.2,
-            color: Colors.grey.shade200,
+            color: Colors.grey.shade600,
           ),
           const Gap(12),
           const Text(
@@ -167,8 +170,10 @@ class _AddNewTaskModelState extends ConsumerState<AddNewTaskModel> {
 
           Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
             CategoryWidget(
-                selectedCategoryColor: ref.read(categoryColorRadioProvider),
-                selectedCategoryName: ref.read(categoryNameRadioProvider)),
+                selectedCategoryColor:
+                    ref.read(categoryNameRadioProvider).colorHex,
+                selectedCategoryName:
+                    ref.read(categoryNameRadioProvider).categoryName),
             const Gap(22),
             DateTimeWidget(
                 titleText: 'Should this repeat?',
@@ -198,9 +203,11 @@ class _AddNewTaskModelState extends ConsumerState<AddNewTaskModel> {
                     titleController.clear();
                     descriptionController.clear();
 
-                    ref
-                        .read(categoryNameRadioProvider.notifier)
-                        .update((state) => 'Select Category');
+                    ref.read(categoryNameRadioProvider.notifier).update(
+                        (state) => UserCreatedCategoryModel(
+                            categoryID: '',
+                            categoryName: "Select Category",
+                            colorHex: ''));
                     ref
                         .read(dateProvider.notifier)
                         .update((state) => 'mm / dd / yy');
@@ -226,25 +233,31 @@ class _AddNewTaskModelState extends ConsumerState<AddNewTaskModel> {
                       padding: const EdgeInsets.symmetric(vertical: 14),
                     ),
                     onPressed: () async {
+                      final selectedCategory =
+                          ref.read(categoryNameRadioProvider);
                       final toDoModel = TaskModel(
                         taskTitle: titleController.text.trim(),
                         description: descriptionController.text.trim(),
-                        category: ref.read(categoryNameRadioProvider),
+                        categoryID: selectedCategory.categoryID,
+                        categoryName: selectedCategory.categoryName,
+                        categoryColorHex: selectedCategory.colorHex,
                         dateTask: ref.read(dateProvider),
                         timeTask: ref.read(timeProvider),
                         isDone: false,
                       );
 
                       final uID = FirebaseAuth.instance.currentUser?.uid;
-                      var categoryID =
-                          'Category: ${ref.read(categoryNameRadioProvider)}';
 
-                      if (uID != null && categoryID != 'Select Category') {
+                      if (uID != null &&
+                          selectedCategory.categoryID.isNotEmpty) {
                         ref.read(serviceProvider).addNewTask(
                               toDoModel,
                               uID,
-                              categoryID,
+                              selectedCategory.categoryID,
                             );
+                        ref.read(taskListProvider.notifier).updateTasks(
+                          [...ref.read(taskListProvider), toDoModel],
+                        );
                       }
 
                       // ignore: avoid_print
@@ -253,9 +266,11 @@ class _AddNewTaskModelState extends ConsumerState<AddNewTaskModel> {
                       titleController.clear();
                       descriptionController.clear();
 
-                      ref
-                          .read(categoryNameRadioProvider.notifier)
-                          .update((state) => 'Select Category');
+                      ref.read(categoryNameRadioProvider.notifier).update(
+                          (state) => UserCreatedCategoryModel(
+                              categoryID: '',
+                              categoryName: "Select Category",
+                              colorHex: ''));
                       ref
                           .read(dateProvider.notifier)
                           .update((state) => 'mm / dd / yy');

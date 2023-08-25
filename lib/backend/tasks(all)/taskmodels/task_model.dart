@@ -4,19 +4,24 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 final toDoModelProvider = StateProvider<TaskModel>((ref) {
   return TaskModel(
-      taskTitle: '',
-      description: '',
-      category: '',
-      dateTask: '',
-      timeTask: '',
-      isDone: false);
+    taskTitle: '',
+    description: '',
+    categoryID: '',
+    categoryName: '',
+    categoryColorHex: '',
+    dateTask: '',
+    timeTask: '',
+    isDone: false,
+  );
 });
 
 class TaskModel {
   final String docID;
   final String taskTitle;
   final String description;
-  final String category;
+  late String categoryID;
+  final String categoryName;
+  final String categoryColorHex;
   final String dateTask;
   final String timeTask;
   final bool isDone;
@@ -25,7 +30,9 @@ class TaskModel {
     this.docID = '',
     required this.taskTitle,
     required this.description,
-    required this.category,
+    required this.categoryID,
+    required this.categoryName,
+    required this.categoryColorHex,
     required this.dateTask,
     required this.timeTask,
     required this.isDone,
@@ -35,7 +42,9 @@ class TaskModel {
       : docID = doc.id,
         taskTitle = doc['taskTitle'],
         description = doc['description'],
-        category = doc['category'],
+        categoryID = doc['categoryID'],
+        categoryName = doc['categoryName'],
+        categoryColorHex = doc['categoryColorHex'],
         dateTask = doc['dateTask'],
         timeTask = doc['timeTask'],
         isDone = doc['isDone'];
@@ -44,7 +53,9 @@ class TaskModel {
       : docID = json['docID'] as String,
         taskTitle = json['taskTitle'] as String,
         description = json['description'] as String,
-        category = json['category'] as String,
+        categoryID = json['categoryID'] as String,
+        categoryName = json['categoryName'] as String,
+        categoryColorHex = json['categoryColorHex'] as String,
         dateTask = json['dateTask'] as String,
         timeTask = json['timeTask'] as String,
         isDone = json['isDone'] as bool;
@@ -53,7 +64,9 @@ class TaskModel {
         'docID': docID,
         'taskTitle': taskTitle,
         'description': description,
-        'category': category,
+        'categoryID': categoryID,
+        'categoryName': categoryName,
+        'categoryColorHex': categoryColorHex,
         'dateTask': dateTask,
         'timeTask': timeTask,
         'isDone': isDone,
