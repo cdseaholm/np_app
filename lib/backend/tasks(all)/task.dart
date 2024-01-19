@@ -4,10 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
-import 'provider/taskproviders/service_provider.dart';
+import 'package:np_app/backend/tasks(all)/provider/taskproviders/task_providers.dart';
 import 'taskmodels/new_task_model.dart';
 import 'widgets/card_task_widget.dart';
-import 'widgets/filter_widget.dart';
+import 'widgets/default_task.dart';
+import 'widgets/filters/filter_widget.dart';
 
 class Tasks extends ConsumerWidget {
   const Tasks({Key? key}) : super(key: key);
@@ -21,7 +22,7 @@ class Tasks extends ConsumerWidget {
         padding: const EdgeInsets.symmetric(horizontal: 30),
         child: Column(
           children: [
-            const Gap(20),
+            const Gap(10),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -49,6 +50,7 @@ class Tasks extends ConsumerWidget {
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8))),
                   onPressed: () => showModalBottomSheet<void>(
+                    showDragHandle: true,
                     isDismissible: false,
                     isScrollControlled: true,
                     shape: RoundedRectangleBorder(
@@ -60,19 +62,12 @@ class Tasks extends ConsumerWidget {
                 ),
               ],
             ),
-            const Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(
-                        width: 110,
-                        child: CustomFilterButton(),
-                      ),
-                    ],
-                  ),
-                ]),
+            const Gap(10),
+            const Row(mainAxisAlignment: MainAxisAlignment.start, children: [
+              Text('Filter By:'),
+              Gap(1),
+              CustomFilterButton(),
+            ]),
             const Divider(
               thickness: .6,
               color: Colors.black,

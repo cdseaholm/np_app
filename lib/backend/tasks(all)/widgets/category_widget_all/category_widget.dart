@@ -4,15 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:gap/gap.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:np_app/backend/tasks(all)/provider/taskproviders/service_provider.dart';
 import '../../provider/taskproviders/selected_category_providers.dart';
 import '../constants/constants.dart';
 
 import 'category.model.dart';
 import 'category_edit.dart';
+import 'category_provider.dart';
 import 'category_service.dart';
 
-class CategoryWidget extends ConsumerWidget {
+class CategoryWidget extends ConsumerStatefulWidget {
   const CategoryWidget({
     Key? key,
     required this.selectedCategoryColor,
@@ -23,10 +23,26 @@ class CategoryWidget extends ConsumerWidget {
   final String selectedCategoryName;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final selectedCategoryColor = ref.watch(categoryNameRadioProvider).colorHex;
+  ConsumerState<ConsumerStatefulWidget> createState() => _CategoryWidgetState();
+}
+
+class _CategoryWidgetState extends ConsumerState<CategoryWidget> {
+  @override
+  Widget build(BuildContext context) {
+    final selectedCategoryColor = ref.watch(selectedCategoryProvider).colorHex;
     final selectedCategoryName =
-        ref.watch(categoryNameRadioProvider).categoryName;
+        ref.watch(selectedCategoryProvider).categoryName;
+    var shownCategory = 'Select Category';
+    if (selectedCategoryName == 'No Category') {
+      setState(() {
+        shownCategory = 'Select Category';
+      });
+    }
+    if (selectedCategoryName != 'No Category') {
+      setState(() {
+        shownCategory = selectedCategoryName;
+      });
+    }
 
     return Expanded(
       child: Column(
@@ -46,8 +62,12 @@ class CategoryWidget extends ConsumerWidget {
               ),
               child: InkWell(
                 borderRadius: BorderRadius.circular(10),
-                onTap: () {
-                  selectCategoryMethod(context, ref);
+                onTap: () async {
+                  showDialog(
+                      context: context,
+                      builder: (context) {
+                        return const SelectCategoryMethod();
+                      });
                 },
                 child: Container(
                   padding: const EdgeInsets.symmetric(
@@ -62,13 +82,13 @@ class CategoryWidget extends ConsumerWidget {
                     children: [
                       const Icon(CupertinoIcons.add),
                       const Gap(6),
-                      if (selectedCategoryName != 'Select Category')
+                      if (shownCategory != 'Select Category')
                         CircleAvatar(
                           backgroundColor: colorFromHex(selectedCategoryColor),
                           radius: 8,
                         ),
                       const Gap(6),
-                      Text(selectedCategoryName),
+                      Text(shownCategory),
                     ],
                   ),
                 ),
@@ -93,36 +113,44 @@ class _SelectCategoryMethodState extends ConsumerState<SelectCategoryMethod> {
   @override
   Widget build(BuildContext context) {
     final categories = ref.watch(categoryProvider);
-
-    return Column(
-      children: categories.asMap().entries.map((entry) {
-        final category = entry.value;
-        return ListTile(
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              CircleAvatar(
-                backgroundColor: colorFromHex(category.colorHex),
-                radius: 12,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                category.categoryName,
-                style: const TextStyle(fontWeight: FontWeight.w700),
-              ),
-            ],
+    return AlertDialog(
+      scrollable: true,
+      title: const Text('Select Category'),
+      backgroundColor: Colors.white,
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (categories.isEmpty) const Text(''),
+          if (categories.isNotEmpty) const CategoryList(),
+          TextButton.icon(
+            icon: const Icon(Icons.add),
+            label: const Text('Add Custom Category'),
+            onPressed: () {
+              showAddCategoryDialog(context, ref);
+            },
           ),
-          onTap: () async {
-            ref.read(categoryNameRadioProvider.notifier).state =
-                UserCreatedCategoryModel(
-              categoryID: category.categoryID,
-              categoryName: category.categoryName,
-              colorHex: category.colorHex,
-            );
-            Navigator.of(context).pop(true);
-          },
-        );
-      }).toList(),
+        ],
+      ),
+      actions: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            if (categories.isNotEmpty)
+              TextButton(
+                onPressed: () async {
+                  Edit().editCategoryDialog(context, ref);
+                },
+                child: const Text('Edit Categories'),
+              ),
+            ElevatedButton(
+              onPressed: () async {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Done'),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
@@ -153,12 +181,13 @@ class CategoryList extends ConsumerWidget {
             ],
           ),
           onTap: () async {
-            ref.read(categoryNameRadioProvider.notifier).state =
-                UserCreatedCategoryModel(
-              categoryID: category.categoryID,
-              categoryName: category.categoryName,
-              colorHex: category.colorHex,
-            );
+            ref
+                .read(selectedCategoryProvider.notifier)
+                .update((state) => UserCreatedCategoryModel(
+                      categoryID: category.categoryID,
+                      categoryName: category.categoryName,
+                      colorHex: category.colorHex,
+                    ));
             Navigator.of(context).pop(true);
           },
         );
@@ -167,59 +196,11 @@ class CategoryList extends ConsumerWidget {
   }
 }
 
-Future<void> selectCategoryMethod(
-  BuildContext context,
-  WidgetRef ref,
-) async {
-  showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          scrollable: true,
-          title: const Text('Select Category'),
-          backgroundColor: Colors.white,
-          content: StatefulBuilder(builder: (context, setState) {
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const SelectCategoryMethod(),
-                TextButton.icon(
-                  icon: const Icon(Icons.add),
-                  label: const Text('Add Custom Category'),
-                  onPressed: () {
-                    showAddCategoryDialog(context, ref);
-                  },
-                )
-              ],
-            );
-          }),
-          actions: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                TextButton(
-                    onPressed: () async {
-                      Edit().editCategoryDialog(context, ref);
-                    },
-                    child: const Text('Edit Categories')),
-                ElevatedButton(
-                  onPressed: () async {
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text('Done'),
-                ),
-              ],
-            ),
-          ],
-        );
-      });
-}
-
 Future<void> showAddCategoryDialog(BuildContext context, WidgetRef ref) async {
   final colorController = TextEditingController();
   final categoryNameController = TextEditingController();
   late var pickerColor = const Color(0xFF4C7755);
-  late String categoryID = ref.watch(categoryNameRadioProvider).categoryID;
+  late String categoryID = ref.watch(selectedCategoryProvider).categoryID;
 
   return showDialog(
     context: context,
@@ -270,20 +251,23 @@ Future<void> showAddCategoryDialog(BuildContext context, WidgetRef ref) async {
                   scaffoldState.showSnackBar(
                     const SnackBar(content: Text('Adding category...')),
                   );
+                  if (categoryNameController.text.isEmpty) {
+                    return CategoryService().categoryEmptyAlertMethod(context);
+                  }
                   final catModel = await addCategory(
                     context,
                     ref,
-                    categoryID,
                     colorController.text,
                     categoryNameController.text,
                   );
                   if (catModel != null) {
-                    ref.read(categoryNameRadioProvider.notifier).state =
-                        UserCreatedCategoryModel(
-                      categoryID: categoryID,
-                      categoryName: catModel.categoryName,
-                      colorHex: catModel.colorHex,
-                    );
+                    ref
+                        .read(selectedCategoryProvider.notifier)
+                        .update((state) => UserCreatedCategoryModel(
+                              categoryID: categoryID,
+                              categoryName: catModel.categoryName,
+                              colorHex: catModel.colorHex,
+                            ));
                   }
                   if (context.mounted) {
                     Navigator.of(dialogContext).pop();
@@ -302,14 +286,9 @@ Future<void> showAddCategoryDialog(BuildContext context, WidgetRef ref) async {
   );
 }
 
-Future<UserCreatedCategoryModel?> addCategory(
-    BuildContext context,
-    WidgetRef ref,
-    String categoryID,
-    String colorHex,
-    String categoryName) async {
+Future<UserCreatedCategoryModel?> addCategory(BuildContext context,
+    WidgetRef ref, String colorHex, String categoryName) async {
   final userCreatedCategoryModel = UserCreatedCategoryModel(
-    categoryID: categoryID,
     categoryName: categoryName,
     colorHex: colorHex,
   );
@@ -323,13 +302,14 @@ Future<UserCreatedCategoryModel?> addCategory(
         // ignore: use_build_context_synchronously
         CategoryService().categoryNameInUseMessage(context);
       } else {
-        final addedCategoryReference = await ref
-            .read(categoryServiceProvider)
-            .addNewCategory(userCreatedCategoryModel);
+        final categoryService = ref.read(categoryServiceProvider);
+
+        final addedCategoryReference =
+            await categoryService.addNewCategory(ref, userCreatedCategoryModel);
 
         final categoryIDMake = addedCategoryReference.id;
 
-        ref.read(categoryNameRadioProvider.notifier).state =
+        ref.read(selectedCategoryProvider.notifier).state =
             UserCreatedCategoryModel(
           categoryID: categoryIDMake,
           categoryName: userCreatedCategoryModel.categoryName,
@@ -341,8 +321,9 @@ Future<UserCreatedCategoryModel?> addCategory(
     } else {
       CategoryService().categoryEmptyAlertMethod(context);
     }
-    // ignore: use_build_context_synchronously
-    Navigator.of(context).pop();
+    if (context.mounted) {
+      Navigator.of(context).pop();
+    }
 
     return userCreatedCategoryModel;
   } catch (e) {

@@ -59,12 +59,3 @@ class DateTimeWidget extends ConsumerWidget {
     );
   }
 }
-
-class RepeatingWidget extends ConsumerWidget {
-  const RepeatingWidget({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    throw UnimplementedError();
-  }
-}

@@ -1,7 +1,5 @@
-import 'dart:math';
-
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class AppStyle {
   static const headingOne =
@@ -11,43 +9,21 @@ class AppStyle {
       TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.black);
 }
 
-class DropDownAnimationArrow {
-  late AnimationController _animationController;
+String formatTaskDate(String date) {
+  final taskDate = DateFormat.yMEd().parse(date);
+  final currentDate = DateTime.now();
+  final difference = taskDate.difference(currentDate).inDays;
 
-  DropDownAnimationArrow(AnimationController animationController) {
-    _animationController = animationController;
+  if (difference <= 60) {
+    return DateFormat.MEd().format(taskDate);
+  } else {
+    return DateFormat.yMd().format(taskDate);
   }
-
-  void toggleAnimation() {
-    if (_animationController.isCompleted) {
-      _animationController.reverse();
-    } else {
-      _animationController.forward();
-    }
-  }
-
-  Widget buildAnimatedIcon() {
-    return AnimatedBuilder(
-      animation: _animationController,
-      builder: (context, child) {
-        return Transform.rotate(
-          angle: _animationController.value * 0.5 * pi,
-          child: const Icon(CupertinoIcons.arrow_down),
-        );
-      },
-    );
-  }
-
-  void dispose() {}
 }
 
-/*
-
-void changeColor(Color color) {
-    setState(() {
-      pickerColor = color;
-      model.colorHex = colorToHex(color);
-    });
-  }
-
-  */
+class RepeatShownStyle {
+  static const inAlertShown = TextStyle(
+      fontSize: 22,
+      decoration: TextDecoration.underline,
+      fontWeight: FontWeight.bold);
+}

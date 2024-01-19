@@ -3,6 +3,7 @@
 import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
 import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, kIsWeb, TargetPlatform;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 /// Default [FirebaseOptions] for use with your Firebase apps.
 ///
@@ -43,45 +44,43 @@ class DefaultFirebaseOptions {
     }
   }
 
-  static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyAJbeSW6VFXgVZ_zobE75bsk8Swhos2V3g',
-    appId: '1:636737039961:web:8966f675437e70e3f44b48',
-    messagingSenderId: '636737039961',
-    projectId: 'newprogressapp',
-    authDomain: 'newprogressapp.firebaseapp.com',
-    databaseURL: 'https://newprogressapp-default-rtdb.firebaseio.com',
-    storageBucket: 'newprogressapp.appspot.com',
-    measurementId: 'G-JFS1VC1L26',
+  static FirebaseOptions web = FirebaseOptions(
+    apiKey: '${dotenv.env["WEBAPIKEY"]}',
+    appId: '${dotenv.env["WEBAPPID"]}',
+    messagingSenderId: '${dotenv.env["MESSAGINGSENDERID"]}',
+    projectId: '${dotenv.env["PROJECTID"]}',
+    authDomain: '${dotenv.env["WEBAUTHDOMAIN"]}',
+    databaseURL: '${dotenv.env["DATABASEURL"]}',
+    storageBucket: '${dotenv.env["STORAGEBUCKET"]}',
+    measurementId: '${dotenv.env["WEBMEASUREMENTID"]}',
   );
 
-  static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyAX5y_TAGZD0rfL_ogGxy0reOEqDfwuFaM',
-    appId: '1:636737039961:android:ef2d5fe71e6e29cbf44b48',
-    messagingSenderId: '636737039961',
-    projectId: 'newprogressapp',
-    databaseURL: 'https://newprogressapp-default-rtdb.firebaseio.com',
-    storageBucket: 'newprogressapp.appspot.com',
+  static FirebaseOptions android = FirebaseOptions(
+    apiKey: '${dotenv.env["ANDROIDAPIKEY"]}',
+    appId: '${dotenv.env["ANDROIDAPPID"]}',
+    messagingSenderId: '${dotenv.env["MESSAGINGSENDERID"]}',
+    projectId: '${dotenv.env["PROJECTID"]}',
+    databaseURL: '${dotenv.env["DATABASEURL"]}',
+    storageBucket: '${dotenv.env["STORAGEBUCKET"]}',
   );
 
-  static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyBXcMnVluFyUpPxKe31a4QkgTyCh8wn1Ag',
-    appId: '1:636737039961:ios:863ec82b7ee4c3a0f44b48',
-    messagingSenderId: '636737039961',
-    projectId: 'newprogressapp',
-    databaseURL: 'https://newprogressapp-default-rtdb.firebaseio.com',
-    storageBucket: 'newprogressapp.appspot.com',
-    iosClientId: '636737039961-dt28ff0kfu9fg908b7daulmc5ualg1e9.apps.googleusercontent.com',
-    iosBundleId: 'com.example.npApp',
+  static FirebaseOptions ios = FirebaseOptions(
+    apiKey: '${dotenv.env["IOSAPIKEY"]}',
+    appId: '${dotenv.env["IOSAPPID"]}',
+    messagingSenderId: '${dotenv.env["MESSAGINGSENDERID"]}',
+    projectId: '${dotenv.env["PROJECTID"]}',
+    databaseURL: '${dotenv.env["DATABASEURL"]}',
+    storageBucket: '${dotenv.env["STORAGEBUCKET"]}',
+    iosBundleId: '${dotenv.env["IOSIOSBUNDLEID"]}',
   );
 
-  static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyBXcMnVluFyUpPxKe31a4QkgTyCh8wn1Ag',
-    appId: '1:636737039961:ios:06bc4a8ab03ebb93f44b48',
-    messagingSenderId: '636737039961',
-    projectId: 'newprogressapp',
-    databaseURL: 'https://newprogressapp-default-rtdb.firebaseio.com',
-    storageBucket: 'newprogressapp.appspot.com',
-    iosClientId: '636737039961-0cu93gti7ec21fufo55ade9859u3jf0o.apps.googleusercontent.com',
-    iosBundleId: 'com.example.npApp.RunnerTests',
+  static FirebaseOptions macos = FirebaseOptions(
+    apiKey: '${dotenv.env["IOSAPIKEY"]}',
+    appId: '${dotenv.env["IOSAPPID"]}',
+    messagingSenderId: '${dotenv.env["MESSAGINGSENDERID"]}',
+    projectId: '${dotenv.env["PROJECTID"]}',
+    databaseURL: '${dotenv.env["DATABASEURL"]}',
+    storageBucket: '${dotenv.env["STORAGEBUCKET"]}',
+    iosBundleId: '${dotenv.env["IOSIOSBUNDLEID"]}',
   );
 }

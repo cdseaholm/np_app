@@ -1,57 +1,41 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
+
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+
 import 'package:np_app/backend/tasks(all)/widgets/category_widget_all/category.model.dart';
+
 import '../../taskmodels/task_model.dart';
+import '../../widgets/category_widget_all/category_provider.dart';
+import 'task_providers.dart';
 
-class CategoryListNotifier
-    extends StateNotifier<List<UserCreatedCategoryModel>> {
-  CategoryListNotifier() : super([]);
+//state providers
 
-  Future<void> updateCategoriesState(
-      List<UserCreatedCategoryModel> categories) async {
-    state = categories;
-  }
+final dateProvider = StateProvider<String>((ref) {
+  return 'mm/dd/yy';
+});
 
-  Future<void> removeCategoriesState(UserCreatedCategoryModel category) async {
-    state =
-        state.where((item) => item.categoryID != category.categoryID).toList();
-  }
+final timeProvider = StateProvider<String>((ref) {
+  return 'hh:mm';
+});
 
-  Future<void> updateCategoryState(
-      UserCreatedCategoryModel updatedCategory) async {
-    if (kDebugMode) {
-      print('Updating category state...');
-    }
-    state = state.map((category) {
-      if (category.categoryID == updatedCategory.categoryID) {
-        return updatedCategory;
-      }
-      return category;
-    }).toList();
-  }
-}
+final repeatingOptionDays = StateProvider<List<String>>((ref) {
+  return [];
+});
 
-final categoryProvider =
-    StateNotifierProvider<CategoryListNotifier, List<UserCreatedCategoryModel>>(
-        (ref) => CategoryListNotifier());
+final repeatingOptionFrequency = StateProvider<String>((ref) {
+  return 'No';
+});
 
-class TaskListNotifier extends StateNotifier<List<TaskModel>> {
-  TaskListNotifier() : super([]);
+final stopDateProvider = StateProvider<String>((ref) {
+  return 'Until?';
+});
 
-  void updateTasks(List<TaskModel> tasks) {
-    state = tasks;
-  }
+final repeatShownProvider = StateProvider<String>((ref) {
+  return 'No';
+});
 
-  void removeTask(TaskModel task) {
-    state = state.where((item) => item.docID != task.docID).toList();
-  }
-}
-
-final taskListProvider =
-    StateNotifierProvider<TaskListNotifier, List<TaskModel>>(
-        (ref) => TaskListNotifier());
+//Category/Tasks fetching
 
 final fetchCategoryTasks =
     StreamProvider.autoDispose<List<TaskModel>>((ref) async* {
@@ -86,23 +70,101 @@ final fetchCategoryTasks =
         tasksSnapshot.docs.map((taskDoc) {
           final taskData = taskDoc.data();
           return TaskModel(
-            docID: taskDoc.id,
-            taskTitle: taskData['taskTitle'] ?? '',
-            description: taskData['description'] ?? '',
-            categoryID: taskData['categoryID'] ?? '',
-            categoryName: taskData['categoryName'] ?? '',
-            categoryColorHex: taskData['categoryColorHex'] ?? '',
-            dateTask: taskData['dateTask'] ?? '',
-            timeTask: taskData['timeTask'] ?? '',
-            isDone: taskData['isDone'] ?? false,
-          );
+              docID: taskData['docID'] ?? '',
+              taskTitle: taskData['taskTitle'] ?? '',
+              description: taskData['description'] ?? '',
+              categoryID: taskData['categoryID'] ?? '',
+              categoryName: taskData['categoryName'] ?? '',
+              categoryColorHex: taskData['categoryColorHex'] ?? '',
+              dateTask: taskData['dateTask'] ?? '',
+              timeTask: taskData['timeTask'] ?? '',
+              isDone: taskData['isDone'] ?? false,
+              status: taskData['status'] ?? '',
+              repeatShown: taskData['repeatShown'] ?? '',
+              repeatingDays: taskData[['repeating']] ?? [],
+              repeatingFrequency: taskData['repeatingFrequency'] ?? '',
+              creationDate: taskData['creationDate'] ?? '',
+              stopDate: taskData['stopDate'] ?? '');
         }),
       );
     }
 
-    tasks.sort((a, b) => a.dateTask.compareTo(b.dateTask));
+    yield tasks;
 
     ref.read(taskListProvider.notifier).updateTasks(tasks);
-    yield tasks;
   }
 });
+
+//update task
+
+final updateTaskProvider = Provider((ref) => UpdateTaskService());
+
+class UpdateTaskService {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  Future<TaskModel?> updateTaskFields({
+    required String userID,
+    required String categoryID,
+    required String categoryName,
+    required String taskID,
+    String? newStatus,
+    String? newTitle,
+    String? newDescription,
+    String? newTime,
+    String? newDate,
+    List<String?>? newRepeatDays,
+    String? newRepeatFrequency,
+    String? newRepeatShown,
+    String? newRepeatUntil,
+    // Add other fields here as needed
+  }) async {
+    final taskRef = _firestore
+        .collection('users')
+        .doc(userID)
+        .collection('Categories')
+        .doc(categoryID)
+        .collection('Tasks')
+        .doc(taskID);
+
+    final Map<String, dynamic> updatedFields = {};
+
+    if (newTitle != null) {
+      updatedFields['taskTitle'] = newTitle;
+    }
+
+    if (newDescription != null) {
+      updatedFields['description'] = newDescription;
+    }
+
+    if (newTime != null) {
+      updatedFields['timeTask'] = newTime;
+    }
+
+    if (newDate != null) {
+      updatedFields['dateTask'] = newDate;
+    }
+
+    if (newRepeatDays != null) {
+      updatedFields['repeatingDays'] = newRepeatDays;
+    }
+
+    if (newRepeatFrequency != null) {
+      updatedFields['repeatingFrequency'] = newRepeatFrequency;
+    }
+
+    if (newRepeatShown != null) {
+      updatedFields['repeatShown'] = newRepeatShown;
+    }
+
+    if (newRepeatUntil != null) {
+      updatedFields['stopDate'] = newRepeatUntil;
+    }
+
+    await taskRef.update(updatedFields);
+    final DocumentSnapshot updatedDoc = await taskRef.get();
+    final updatedTaskData = updatedDoc.data() as Map<String, dynamic>;
+    final updatedTask = TaskModel.fromJson(updatedTaskData);
+
+    return updatedTask;
+  }
+}

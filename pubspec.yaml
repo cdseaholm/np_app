@@ -64,6 +64,8 @@ dependencies:
   flutter_colorpicker: ^1.0.3
   async: ^2.11.0
   rxdart: ^0.27.7
+  multiselect: ^0.1.0
+  flutter_dotenv: ^5.1.0
 
 dev_dependencies:
   flutter_test:
@@ -88,7 +90,8 @@ flutter:
   uses-material-design: true
   assets:
     - assets/Images/nplogo.png
-    - assets/Images/google.png
+    - assets/Images/Google.png
+    - .env
 
 
   # To add assets to your application, add an assets section, like this:

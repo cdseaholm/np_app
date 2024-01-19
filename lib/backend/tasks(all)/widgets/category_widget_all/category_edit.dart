@@ -1,12 +1,13 @@
-import 'package:np_app/backend/tasks(all)/provider/taskproviders/service_provider.dart';
-
+import 'package:flutter/foundation.dart';
 import '../../provider/taskproviders/selected_category_providers.dart';
+import '../../provider/taskproviders/task_providers.dart';
 import 'category.model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'category_provider.dart';
 import 'category_service.dart';
 
 class EditCategoryDialogContent extends ConsumerStatefulWidget {
@@ -55,7 +56,16 @@ class _EditCategoryDialogContentState
                       child: const Text('Edit')),
                   IconButton(
                       onPressed: () {
+                        ref.read(categoryUpdateRadioProvider.notifier).state =
+                            UserCreatedCategoryModel(
+                          categoryID: category.categoryID,
+                          categoryName: category.categoryName,
+                          colorHex: category.colorHex,
+                        );
                         deleteCategoryMethod(context, ref);
+                        if (kDebugMode) {
+                          print('new cat update: $categoryUpdateRadioProvider');
+                        }
                       },
                       icon: const Icon(CupertinoIcons.trash))
                 ]),
@@ -68,7 +78,7 @@ class _EditCategoryDialogContentState
               );
               if (context.mounted) {
                 if (yes == true) {
-                  Navigator.pushReplacementNamed(context, 'editCategory1');
+                  Navigator.pushNamed(context, 'editCategory1');
                 } else {
                   Navigator.pop(context);
                 }
@@ -101,6 +111,7 @@ class Edit {
                   ElevatedButton(
                     onPressed: () async {
                       ref.read(categoryProvider);
+                      ref.read(taskListProvider.notifier).updateTasks;
 
                       Navigator.of(context).pop(true);
                     },
@@ -175,8 +186,10 @@ Future<void> editThisCategory(BuildContext context, WidgetRef ref) async {
               ref.read(categoryUpdateRadioProvider.notifier).state =
                   updatedCategoryModel;
 
-              await CategoryService()
-                  .updateCategory(context, ref, updatedCategoryModel);
+              await CategoryService().updateCategory(ref, updatedCategoryModel);
+
+              await ToDoService()
+                  .updateTasksColorForCategory(ref, updatedCategoryModel);
 
               if (context.mounted) {
                 Navigator.of(context).pop(true);
@@ -192,7 +205,7 @@ Future<void> editThisCategory(BuildContext context, WidgetRef ref) async {
 
 Future<void> deleteCategoryMethod(BuildContext context, WidgetRef ref) async {
   final userID = FirebaseAuth.instance.currentUser?.uid;
-  final categoryID = ref.watch(categoryNameRadioProvider).categoryID;
+  final categoryID = ref.watch(categoryUpdateRadioProvider).categoryID;
 
   showDialog(
     context: context,
@@ -211,10 +224,13 @@ Future<void> deleteCategoryMethod(BuildContext context, WidgetRef ref) async {
           ),
           TextButton(
             onPressed: () async {
-              await CategoryService().deleteCategory(userID!, categoryID);
+              await CategoryService()
+                  .deleteCategory(userID!, categoryID)
+                  .then((value) => null);
               if (context.mounted) {
                 Navigator.of(context).pop(true);
               }
+              ref.read(taskListProvider.notifier).updateTasks;
             },
             child: const Text('Continue'),
           ),

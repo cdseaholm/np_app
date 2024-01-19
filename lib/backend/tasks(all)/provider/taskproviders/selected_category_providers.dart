@@ -8,21 +8,13 @@ class SelectedCategory {
   SelectedCategory({required this.model});
 }
 
-final categoryNameRadioProvider =
-    StateProvider<UserCreatedCategoryModel>((ref) {
+final selectedCategoryProvider = StateProvider<UserCreatedCategoryModel>((ref) {
   return UserCreatedCategoryModel(
-      categoryID: '', categoryName: 'Select Category', colorHex: '');
+      categoryID: '', categoryName: 'No Category', colorHex: '#4C7755');
 });
-
-final taskRadioProvider = StateProvider<Map<String, dynamic>?>((ref) {
-  return null;
-});
-
-final selectedCategoryProvider =
-    StateProvider<UserCreatedCategoryModel?>((ref) => null);
 
 final categoryUpdateRadioProvider =
     StateProvider<UserCreatedCategoryModel>((ref) {
   return UserCreatedCategoryModel(
-      categoryID: '', categoryName: 'Select Category', colorHex: '');
+      categoryID: '', categoryName: 'No Category', colorHex: '#4C7755');
 });

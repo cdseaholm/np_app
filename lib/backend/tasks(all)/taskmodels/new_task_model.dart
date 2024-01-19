@@ -4,14 +4,17 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
-import 'package:np_app/backend/tasks(all)/task_service.dart';
-import 'package:np_app/backend/tasks(all)/widgets/category_widget_all/category.model.dart';
 import 'package:np_app/backend/tasks(all)/widgets/constants/constants.dart';
 import 'package:np_app/backend/tasks(all)/taskmodels/task_model.dart';
-import 'package:np_app/backend/tasks(all)/widgets/task_widgets.dart';
+import 'package:np_app/backend/tasks(all)/repeat/repeat_widget.dart';
+import 'package:np_app/backend/tasks(all)/widgets/date_time_widgets.dart';
 import 'package:np_app/backend/tasks(all)/provider/taskproviders/task_providers.dart';
+import '../../../main.dart';
+import '../provider/taskproviders/clean_providers.dart';
 import '../provider/taskproviders/selected_category_providers.dart';
 import '../provider/taskproviders/service_provider.dart';
+import '../repeat/repeat_notifiers.dart';
+import '../widgets/category_widget_all/category_service.dart';
 import '../widgets/category_widget_all/category_widget.dart';
 import '../widgets/textfield_widget.dart';
 
@@ -28,6 +31,22 @@ class AddNewTaskModel extends ConsumerStatefulWidget {
 class _AddNewTaskModelState extends ConsumerState<AddNewTaskModel> {
   final titleController = TextEditingController();
   final descriptionController = TextEditingController();
+  List<String> newTaskSelectedDays = [];
+  final TaskModel noTask = TaskModel(
+      taskTitle: '',
+      description: '',
+      categoryID: '',
+      categoryName: '',
+      categoryColorHex: '',
+      dateTask: '',
+      timeTask: '',
+      isDone: false,
+      repeatShown: '',
+      repeatingDays: [],
+      repeatingFrequency: '',
+      stopDate: '',
+      creationDate: '',
+      status: '');
 
   @override
   void initState() {
@@ -45,8 +64,15 @@ class _AddNewTaskModelState extends ConsumerState<AddNewTaskModel> {
 
   @override
   Widget build(BuildContext context) {
+    var stopDate = repeatUntilNotifier.value;
     final dateProv = ref.watch(dateProvider);
     final uID = FirebaseAuth.instance.currentUser?.uid;
+    final creationDate = TimeOfDay.fromDateTime(DateTime.now());
+    final category = ref.watch(selectedCategoryProvider);
+    var repeatingDays = ref.watch(repeatingOptionDays);
+    var repeatingFrequency = ref.watch(repeatingOptionFrequency);
+    var repeatShown = ref.watch(repeatShownProvider);
+
     if (uID == null) {
       showDialog(
         context: context,
@@ -135,8 +161,8 @@ class _AddNewTaskModelState extends ConsumerState<AddNewTaskModel> {
                   final getValue = await showDatePicker(
                       context: context,
                       initialDate: DateTime.now(),
-                      firstDate: DateTime(2021),
-                      lastDate: DateTime(2025));
+                      firstDate: DateTime(DateTime.now().year - 2),
+                      lastDate: DateTime(DateTime.now().year + 4));
 
                   if (getValue != null) {
                     final format = DateFormat.yMEd();
@@ -170,121 +196,139 @@ class _AddNewTaskModelState extends ConsumerState<AddNewTaskModel> {
 
           Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
             CategoryWidget(
-                selectedCategoryColor:
-                    ref.read(categoryNameRadioProvider).colorHex,
-                selectedCategoryName:
-                    ref.read(categoryNameRadioProvider).categoryName),
+                selectedCategoryColor: category.colorHex,
+                selectedCategoryName: category.categoryName),
             const Gap(22),
-            DateTimeWidget(
-                titleText: 'Should this repeat?',
-                valueText: ref.watch(repeatingProvider),
-                iconSection: CupertinoIcons.arrow_counterclockwise,
-                onTap: () async {}),
+            RepeatingWidget(previousPage: PreviousPage.newTask, task: noTask),
           ]),
 
           //Button Section
 
           const Gap(12),
 
-          Row(
-            children: [
-              Expanded(
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: Colors.blue.shade800,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
+          Row(children: [
+            Expanded(
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: Colors.blue.shade800,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  onPressed: () {
-                    titleController.clear();
-                    descriptionController.clear();
-
-                    ref.read(categoryNameRadioProvider.notifier).update(
-                        (state) => UserCreatedCategoryModel(
-                            categoryID: '',
-                            categoryName: "Select Category",
-                            colorHex: ''));
-                    ref
-                        .read(dateProvider.notifier)
-                        .update((state) => 'mm / dd / yy');
-                    ref
-                        .read(timeProvider.notifier)
-                        .update((state) => 'hh : mm');
-                    Navigator.pop(context);
-                  },
-                  child: const Text('Cancel'),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
+                onPressed: () {
+                  titleController.clear();
+                  descriptionController.clear();
+
+                  ProvidersClear().clearNewTaskProvidersCancel(ref);
+                  setState(() {
+                    frequencyNotifier.value = 'No';
+                    repeatUntilNotifier.value = 'Until?';
+                    selectedDaysNotifier.value = [];
+                    selectedRepeatingDaysList.clear();
+                    showDaysHint = true;
+                  });
+
+                  Navigator.pop(context);
+                },
+                child: const Text('Cancel'),
               ),
-              const Gap(20),
-              Expanded(
-                child: Builder(builder: (context) {
-                  return ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue.shade800,
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                    ),
-                    onPressed: () async {
-                      final selectedCategory =
-                          ref.read(categoryNameRadioProvider);
-                      final toDoModel = TaskModel(
-                        taskTitle: titleController.text.trim(),
-                        description: descriptionController.text.trim(),
-                        categoryID: selectedCategory.categoryID,
-                        categoryName: selectedCategory.categoryName,
-                        categoryColorHex: selectedCategory.colorHex,
-                        dateTask: ref.read(dateProvider),
-                        timeTask: ref.read(timeProvider),
-                        isDone: false,
-                      );
+            ),
+            const Gap(20),
+            Expanded(child: Builder(builder: (context) {
+              return ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue.shade800,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                ),
+                onPressed: () async {
+                  final toDoModel = TaskModel(
+                    taskTitle: titleController.text.trim(),
+                    description: descriptionController.text.trim(),
+                    categoryID: category.categoryID,
+                    categoryName: category.categoryName,
+                    categoryColorHex: category.colorHex,
+                    dateTask: ref.read(dateProvider),
+                    timeTask: ref.read(timeProvider),
+                    isDone: false,
+                    repeatShown: repeatShown,
+                    repeatingDays: repeatingDays,
+                    repeatingFrequency: repeatingFrequency,
+                    stopDate: stopDate,
+                    creationDate: creationDate.toString(),
+                    status: 'Upcoming',
+                  );
 
-                      final uID = FirebaseAuth.instance.currentUser?.uid;
+                  final uID = FirebaseAuth.instance.currentUser?.uid;
 
-                      if (uID != null &&
-                          selectedCategory.categoryID.isNotEmpty) {
-                        ref.read(serviceProvider).addNewTask(
+                  if (uID != null) {
+                    if (category.categoryName == 'No Category') {
+                      await addNoCategory(context, ref, category.colorHex,
+                          category.categoryName);
+                      final noCategory = ref.read(selectedCategoryProvider);
+                      final newTaskReference = await ref
+                          .read(serviceProvider)
+                          .addNewTask(
+                              ref, toDoModel, uID, noCategory.categoryID);
+
+                      toDoModel.docID = newTaskReference.id;
+                    } else {
+                      if (category.categoryID.isNotEmpty) {
+                        final newTaskReference =
+                            await ref.read(serviceProvider).addNewTask(
+                                  ref,
+                                  toDoModel,
+                                  uID,
+                                  category.categoryID,
+                                );
+
+                        toDoModel.docID = newTaskReference.id;
+                      } else {
+                        return;
+                      }
+                    }
+                  } else if (uID != null && category.categoryID.isNotEmpty) {
+                    final newTaskReference =
+                        await ref.read(serviceProvider).addNewTask(
+                              ref,
                               toDoModel,
                               uID,
-                              selectedCategory.categoryID,
+                              category.categoryID,
                             );
-                        ref.read(taskListProvider.notifier).updateTasks(
-                          [...ref.read(taskListProvider), toDoModel],
-                        );
-                      }
+                    toDoModel.docID = newTaskReference.id;
 
-                      // ignore: avoid_print
-                      print('Data is saving');
+                    ref.read(taskListProvider.notifier).updateTasks(
+                      [...ref.read(taskListProvider), toDoModel],
+                    );
+                  }
 
-                      titleController.clear();
-                      descriptionController.clear();
+                  ref.read(fetchCategoryTasks).isRefreshing;
 
-                      ref.read(categoryNameRadioProvider.notifier).update(
-                          (state) => UserCreatedCategoryModel(
-                              categoryID: '',
-                              categoryName: "Select Category",
-                              colorHex: ''));
-                      ref
-                          .read(dateProvider.notifier)
-                          .update((state) => 'mm / dd / yy');
-                      ref
-                          .read(timeProvider.notifier)
-                          .update((state) => 'hh : mm');
-                      Navigator.pop(context);
-                    },
-                    child: const Text('Create'),
-                  );
-                }),
-              ),
-            ],
-          )
+                  ProvidersClear().newTaskProviderClearCreate(
+                      titleController, descriptionController, ref);
+                  setState(() {
+                    frequencyNotifier.value = 'No';
+                    repeatUntilNotifier.value = 'Until?';
+                    selectedDaysNotifier.value = [];
+                    selectedRepeatingDaysList.clear();
+                    showDaysHint = true;
+                  });
+
+                  if (context.mounted) {
+                    Navigator.pop(context);
+                  }
+                },
+                child: const Text('Create'),
+              );
+            }))
+          ])
         ]));
   }
 }

@@ -18,7 +18,6 @@ class HomeDisplayNameWidget extends ConsumerWidget {
             error: (error, stackTrace) => Text(error.toString()),
             data: (credModel) {
               if (credModel == null) {
-                // Handle the case when data is not available
                 return const Text("Your Progress");
               }
 
@@ -45,7 +44,6 @@ class ProfileDisplayNameWidget extends ConsumerWidget {
             error: (error, stackTrace) => Text(error.toString()),
             data: (credModel) {
               if (credModel == null) {
-                // Handle the case when data is not available
                 return const Text("Profile Settings");
               }
 

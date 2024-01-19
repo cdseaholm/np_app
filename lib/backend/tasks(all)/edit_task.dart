@@ -1,28 +1,31 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:np_app/backend/tasks(all)/repeat/repeat_notifiers.dart';
+import '../../main.dart';
 import '../auth_pages/auth_provider.dart';
+import 'provider/taskproviders/clean_providers.dart';
 import 'provider/taskproviders/selected_category_providers.dart';
 import 'provider/taskproviders/service_provider.dart';
 import 'provider/taskproviders/task_providers.dart';
-import 'task_service.dart';
 import 'taskmodels/task_model.dart';
-import 'widgets/category_widget_all/category.model.dart';
 import 'widgets/category_widget_all/category_widget.dart';
 import 'widgets/constants/constants.dart';
-import 'widgets/task_widgets.dart';
+import 'widgets/date_time_widgets.dart';
+import 'repeat/repeat_widget.dart';
+import 'widgets/status/status_providers.dart';
 import 'widgets/textfield_widget.dart';
 
 class EditTaskModel extends ConsumerStatefulWidget {
-  final TaskModel task;
-
-  const EditTaskModel({
-    Key? key,
-    required this.task,
-  }) : super(key: key);
+  final TaskModel taskToUpdate;
+  final Function(TaskModel) onTaskUpdated;
+  const EditTaskModel(
+      {Key? key, required this.taskToUpdate, required this.onTaskUpdated})
+      : super(key: key);
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() => _EditTaskModelState();
@@ -36,9 +39,14 @@ class _EditTaskModelState extends ConsumerState<EditTaskModel> {
   @override
   void initState() {
     super.initState();
-    final task = widget.task;
-    titleController = TextEditingController(text: task.taskTitle);
-    descriptionController = TextEditingController(text: task.description);
+    var taskToUpdate = widget.taskToUpdate;
+
+    titleController = TextEditingController(
+      text: taskToUpdate.taskTitle,
+    );
+    descriptionController = TextEditingController(
+      text: taskToUpdate.description,
+    );
   }
 
   @override
@@ -50,9 +58,9 @@ class _EditTaskModelState extends ConsumerState<EditTaskModel> {
 
   @override
   Widget build(BuildContext context) {
-    final categoryName = ref.watch(categoryNameRadioProvider).categoryName;
-    final categoryColor = ref.watch(categoryNameRadioProvider).colorHex;
-    final task = widget.task;
+    var taskToUpdate = widget.taskToUpdate;
+    var category = ref.watch(selectedCategoryProvider);
+
     return Container(
       padding: const EdgeInsets.all(30),
       height: MediaQuery.of(context).size.height * 0.8,
@@ -91,19 +99,35 @@ class _EditTaskModelState extends ConsumerState<EditTaskModel> {
                   padding:
                       const EdgeInsets.symmetric(vertical: 0, horizontal: 5),
                 ),
-                onPressed: () {
+                onPressed: () async {
                   final userID = ref.read(authStateProvider).maybeWhen(
                         data: (user) => user?.uid,
                         orElse: () => null,
                       );
-                  ref.read(serviceProvider).deleteTask(
-                        userID!,
-                        task.categoryID,
-                        task.docID,
-                      );
-                  ref.read(taskListProvider.notifier).removeTask(task);
+                  if (userID != null) {
+                    try {
+                      ref
+                          .read(taskListProvider.notifier)
+                          .removeTask(taskToUpdate);
+                    } catch (error) {
+                      if (kDebugMode) {
+                        print('Error deleting task: $error');
+                      }
+                    }
+                  }
 
-                  Navigator.of(context).pop();
+                  ProvidersClear().clearEditTask(ref);
+                  setState(() {
+                    frequencyNotifier.value = 'No';
+                    repeatUntilNotifier.value = 'Until?';
+                    selectedDaysNotifier.value = [];
+                    selectedRepeatingDaysList.clear();
+                    showDaysHint = true;
+                  });
+
+                  if (context.mounted) {
+                    Navigator.pop(context);
+                  }
                 },
                 child: const Text(
                   'Delete Task',
@@ -140,36 +164,42 @@ class _EditTaskModelState extends ConsumerState<EditTaskModel> {
           children: [
             DateTimeWidget(
               titleText: 'Date',
-              valueText: task.dateTask,
+              valueText: taskToUpdate.dateTask,
               iconSection: CupertinoIcons.calendar,
               onTap: () async {
                 final getValue = await showDatePicker(
                     context: context,
                     initialDate: DateTime.now(),
-                    firstDate: DateTime(2021),
-                    lastDate: DateTime(2025));
+                    firstDate: DateTime(DateTime.now().year - 2),
+                    lastDate: DateTime(DateTime.now().year + 4));
 
                 if (getValue != null) {
                   final format = DateFormat.yMEd();
-                  ref
-                      .read(dateProvider.notifier)
-                      .update((state) => format.format(getValue));
+                  final newDate = format.format(getValue);
+                  setState(() {
+                    taskToUpdate.dateTask = newDate;
+                  });
                 }
               },
             ),
             const Gap(22),
             DateTimeWidget(
               titleText: 'Time',
-              valueText: task.timeTask,
+              valueText: taskToUpdate.timeTask,
               iconSection: CupertinoIcons.clock,
               onTap: () async {
                 final getTime = await showTimePicker(
-                    context: context, initialTime: TimeOfDay.now());
+                  context: context,
+                  initialTime: TimeOfDay.now(),
+                );
 
                 if (getTime != null) {
-                  ref
-                      .read(timeProvider.notifier)
-                      .update((state) => getTime.format(context));
+                  // ignore: use_build_context_synchronously
+                  final newTime = getTime.format(context);
+
+                  setState(() {
+                    taskToUpdate.timeTask = newTime;
+                  });
                 }
               },
             ),
@@ -181,15 +211,14 @@ class _EditTaskModelState extends ConsumerState<EditTaskModel> {
 
         Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
           CategoryWidget(
-            selectedCategoryColor: categoryColor,
-            selectedCategoryName: categoryName,
+            selectedCategoryColor: category.colorHex,
+            selectedCategoryName: category.categoryName,
           ),
           const Gap(22),
-          DateTimeWidget(
-              titleText: 'Should this repeat?',
-              valueText: ref.watch(repeatingProvider),
-              iconSection: CupertinoIcons.arrow_counterclockwise,
-              onTap: () async {}),
+          RepeatingWidget(
+            previousPage: PreviousPage.editTask,
+            task: taskToUpdate,
+          ),
         ]),
 
         //Button Section
@@ -210,19 +239,15 @@ class _EditTaskModelState extends ConsumerState<EditTaskModel> {
                   padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
                 onPressed: () {
-                  ref.read(taskRadioProvider.notifier).update((state) => null);
-                  titleController.clear();
-                  descriptionController.clear();
+                  ProvidersClear().clearEditTask(ref);
+                  setState(() {
+                    frequencyNotifier.value = 'No';
+                    repeatUntilNotifier.value = 'Until?';
+                    selectedDaysNotifier.value = [];
+                    selectedRepeatingDaysList.clear();
+                    showDaysHint = true;
+                  });
 
-                  ref.read(categoryNameRadioProvider.notifier).update((state) =>
-                      UserCreatedCategoryModel(
-                          categoryID: '',
-                          categoryName: "Select Category",
-                          colorHex: ''));
-                  ref
-                      .read(dateProvider.notifier)
-                      .update((state) => 'mm / dd / yy');
-                  ref.read(timeProvider.notifier).update((state) => 'hh : mm');
                   Navigator.pop(context);
                 },
                 child: const Text('Cancel'),
@@ -242,38 +267,58 @@ class _EditTaskModelState extends ConsumerState<EditTaskModel> {
                     padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
                   onPressed: () async {
-                    final selectedCategory =
-                        ref.read(categoryNameRadioProvider);
-                    final toDoModel = TaskModel(
-                      taskTitle: task.taskTitle,
-                      description: task.description,
-                      categoryID: task.categoryID,
-                      categoryName: task.categoryName,
-                      categoryColorHex: task.categoryColorHex,
-                      dateTask: task.dateTask,
-                      timeTask: task.timeTask,
-                      isDone: task.isDone,
-                    );
+                    final userID = FirebaseAuth.instance.currentUser?.uid;
+                    final newTitle = titleController.text;
+                    final newDescription = descriptionController.text;
+                    final status = determineTaskStatus(taskToUpdate.dateTask);
 
-                    final uID = FirebaseAuth.instance.currentUser?.uid;
+                    final newRepeatDays = ref.read(repeatingOptionDays);
 
-                    if (uID != null && selectedCategory.categoryID.isNotEmpty) {
-                      ref.read(serviceProvider).addNewTask(
-                            toDoModel,
-                            uID,
-                            selectedCategory.categoryID,
-                          );
+                    final newRepeatFrequency =
+                        ref.read(repeatingOptionFrequency);
+                    final newRepeatShown = ref.read(repeatShownProvider);
+                    final newRepeatUntil = ref.read(stopDateProvider);
+                    final updatedTask =
+                        await ref.read(updateTaskProvider).updateTaskFields(
+                              userID: userID!,
+                              categoryID: category.categoryID,
+                              categoryName: category.categoryName,
+                              taskID: taskToUpdate.docID,
+                              newTitle: newTitle,
+                              newDescription: newDescription,
+                              newDate: taskToUpdate.dateTask,
+                              newTime: taskToUpdate.timeTask,
+                              newStatus: status,
+                              newRepeatDays: newRepeatDays,
+                              newRepeatShown: newRepeatShown,
+                              newRepeatFrequency: newRepeatFrequency,
+                              newRepeatUntil: newRepeatUntil,
+                            );
+
+                    if (updatedTask != null) {
+                      ToDoService().updateTasksList(ref, updatedTask);
                     }
 
-                    // ignore: avoid_print
-                    print('Data is saving');
-
                     ref
-                        .read(taskRadioProvider.notifier)
-                        .update((state) => null);
-                    Navigator.pop(context);
+                        .read(taskListProvider.notifier)
+                        .updateTasks([...ref.read(taskListProvider)]);
+
+                    ref.read(fetchCategoryTasks).isRefreshing;
+
+                    ProvidersClear().clearEditTask(ref);
+                    setState(() {
+                      selectedRepeatingDaysList = [];
+                      frequencyNotifier.value = 'No';
+                      repeatUntilNotifier.value = 'Until?';
+                      selectedDaysNotifier.value = [];
+                      showDaysHint = true;
+                    });
+
+                    if (context.mounted) {
+                      Navigator.pop(context);
+                    }
                   },
-                  child: const Text('Create'),
+                  child: const Text('Update'),
                 );
               }),
             ),

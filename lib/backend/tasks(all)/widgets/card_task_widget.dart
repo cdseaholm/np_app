@@ -1,29 +1,41 @@
 // ignore_for_file: unnecessary_null_comparison
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-import 'package:gap/gap.dart';
-
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:intl/intl.dart';
-import 'package:np_app/backend/tasks(all)/provider/taskproviders/selected_category_providers.dart';
-import 'package:np_app/backend/tasks(all)/widgets/category_widget_all/category.model.dart';
-
-import '../../auth_pages/auth_provider.dart';
+import 'package:np_app/backend/tasks(all)/provider/taskproviders/service_provider.dart';
+import 'package:np_app/backend/tasks(all)/repeat/repeat_notifiers.dart';
 import '../edit_task.dart';
-import '../provider/taskproviders/service_provider.dart';
-import '../task_service.dart';
+import '../provider/taskproviders/selected_category_providers.dart';
+import '../provider/taskproviders/task_providers.dart';
+import '../taskmodels/task_model.dart';
+import 'category_widget_all/category.model.dart';
+import 'constants/constants.dart';
+import 'status/status_providers.dart';
 
-class CardToolListWidget extends ConsumerWidget {
+class CardToolListWidget extends ConsumerStatefulWidget {
   const CardToolListWidget({required this.getIndex, Key? key})
       : super(key: key);
 
   final int getIndex;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ConsumerStatefulWidget> createState() =>
+      _CardToolListWidgetState();
+}
+
+class _CardToolListWidgetState extends ConsumerState<CardToolListWidget> {
+  @override
+  Widget build(BuildContext context) {
     final tasks = ref.watch(taskListProvider);
-    final currentTask = tasks[getIndex];
+    var currentTask = tasks[widget.getIndex];
+    final isDoneNotifier = ValueNotifier<bool>(currentTask.isDone);
+    var statusText = currentTask.status;
+    final statusNotifier = ValueNotifier<String>(currentTask.dateTask);
+
     return Container(
         margin: const EdgeInsets.symmetric(vertical: 4),
         width: double.infinity,
@@ -61,21 +73,24 @@ class CardToolListWidget extends ConsumerWidget {
                           elevation: 0,
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8))),
-                      onPressed: () {
-                        ref.read(categoryNameRadioProvider.notifier).state =
-                            UserCreatedCategoryModel(
-                          categoryID: currentTask.categoryID,
-                          categoryName: currentTask.categoryName,
-                          colorHex: currentTask.categoryColorHex,
-                        );
-                        showModalBottomSheet(
+                      onPressed: () async {
+                        updateProviders(currentTask, ref);
+
+                        await showModalBottomSheet(
+                          showDragHandle: true,
                           isDismissible: false,
                           isScrollControlled: true,
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(16)),
                           context: context,
-                          builder: (context) =>
-                              EditTaskModel(task: currentTask),
+                          builder: (context) => EditTaskModel(
+                            taskToUpdate: currentTask,
+                            onTaskUpdated: (task) {
+                              setState(() {
+                                currentTask = task;
+                              });
+                            },
+                          ),
                         );
                       },
                       child: const Text(
@@ -83,58 +98,156 @@ class CardToolListWidget extends ConsumerWidget {
                         style: TextStyle(fontSize: 12),
                       ),
                     ),
-                    title: Text(
-                      currentTask.taskTitle,
-                      maxLines: 1,
-                      style: TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black,
-                          decoration: currentTask.isDone
-                              ? TextDecoration.lineThrough
-                              : null),
-                    ),
+                    title: ValueListenableBuilder<bool>(
+                        valueListenable: isDoneNotifier,
+                        builder: (context, isDone, child) {
+                          return Text(
+                            currentTask.taskTitle,
+                            maxLines: 1,
+                            style: TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black,
+                              decoration: isDoneNotifier.value
+                                  ? TextDecoration.lineThrough
+                                  : TextDecoration.none,
+                            ),
+                          );
+                        }),
                     subtitle: Text(
                       currentTask.description,
                       maxLines: 1,
                     ),
                     trailing: Transform.scale(
-                      scale: 1.5,
-                      child: Checkbox(
-                        activeColor: Colors.blue.shade800,
-                        shape: const CircleBorder(),
-                        value: currentTask.isDone,
-                        // ignore: avoid_print
-                        onChanged: (value) {
-                          final userID = ref.read(authStateProvider).maybeWhen(
-                                data: (user) => user?.uid,
-                                orElse: () => null,
+                        scale: 1.2,
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: 5.0),
+                          child: ValueListenableBuilder<bool>(
+                            valueListenable: isDoneNotifier,
+                            builder: (context, isDone, child) {
+                              return Column(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
+                                children: [
+                                  Checkbox(
+                                    materialTapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
+                                    activeColor: Colors.blue.shade800,
+                                    shape: const CircleBorder(),
+                                    value: isDone,
+                                    onChanged: (value) async {
+                                      final userID = FirebaseAuth
+                                          .instance.currentUser?.uid;
+                                      ref.read(serviceProvider).updateDoneTask(
+                                            userID!,
+                                            currentTask.categoryID,
+                                            currentTask.docID,
+                                            value,
+                                          );
+                                      final newStatus =
+                                          value! ? 'Completed' : statusText;
+                                      await UpdateTaskService()
+                                          .updateTaskFields(
+                                        userID: userID,
+                                        categoryID:
+                                            currentTask.categoryColorHex,
+                                        categoryName: currentTask.categoryName,
+                                        taskID: currentTask.docID,
+                                        newStatus: newStatus,
+                                      );
+
+                                      if (value) {
+                                        statusNotifier.value = 'Completed';
+                                      } else {
+                                        statusNotifier.value = statusText;
+                                      }
+
+                                      isDoneNotifier.value = value;
+                                    },
+                                  )
+                                ],
                               );
-                          ref.read(serviceProvider).updateTask(
-                                userID!,
-                                currentTask.categoryID,
-                                currentTask.docID,
-                                value,
-                              );
-                        },
-                      ),
-                    ),
+                            },
+                          ),
+                        )),
                   ),
                   Transform.translate(
                     offset: const Offset(0, -12),
                     child: Column(
                       children: [
-                        Divider(
+                        const Divider(
                           thickness: 1.5,
-                          color: Colors.grey.shade200,
+                          color: Colors.black38,
                         ),
                         Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
-                              formatTaskDate(currentTask.dateTask),
-                            ),
-                            const Gap(12),
-                            Text(currentTask.timeTask)
+                            Column(children: [
+                              if (currentTask.dateTask == 'mm/dd/yy' &&
+                                  currentTask.timeTask == 'hh:mm')
+                                const Text('No Date or Time set')
+                              else if (currentTask.dateTask != 'mm/dd/yy' &&
+                                  currentTask.timeTask == 'hh:mm')
+                                Text(formatTaskDate(currentTask.dateTask))
+                              else if (currentTask.dateTask == 'mm/dd/yy' &&
+                                  currentTask.timeTask != 'hh:mm')
+                                Text('No Date Set, ${currentTask.timeTask}')
+                              else if (currentTask.dateTask != 'mm/dd/yy' &&
+                                  currentTask.timeTask != 'hh:mm')
+                                Text(
+                                    '${formatTaskDate(currentTask.dateTask)} ${currentTask.timeTask}'),
+                            ]),
+                            ValueListenableBuilder<String>(
+                                valueListenable: statusNotifier,
+                                builder: (context, status, child) {
+                                  if (currentTask.dateTask == 'mm/dd/yy') {
+                                    return Container();
+                                  } else if (currentTask.dateTask !=
+                                      'mm/dd/yy') {
+                                    final taskStatus = determineTaskStatus(
+                                        currentTask.dateTask);
+
+                                    // Define the style based on the task status
+                                    TextStyle textStyle;
+                                    if (taskStatus == 'Overdue') {
+                                      textStyle = const TextStyle(
+                                          color: Colors.red,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 13);
+                                    } else if (taskStatus == 'Completed') {
+                                      textStyle = const TextStyle(
+                                          color: Colors.green,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 13);
+                                    } else if (taskStatus == 'Due Today') {
+                                      textStyle = const TextStyle(
+                                          color: Colors.blue,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 13);
+                                    } else if (taskStatus == 'Upcoming') {
+                                      textStyle = const TextStyle(
+                                          color: Colors.blueGrey,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 13);
+                                    } else {
+                                      textStyle = const TextStyle(
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 13);
+                                    }
+                                    return Flexible(
+                                      child: Column(
+                                        children: [
+                                          Text(
+                                            taskStatus,
+                                            style: textStyle,
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  }
+                                  return Container();
+                                })
                           ],
                         )
                       ],
@@ -146,52 +259,67 @@ class CardToolListWidget extends ConsumerWidget {
   }
 }
 
-class DisplayDefaultTask extends ConsumerWidget {
-  const DisplayDefaultTask({super.key});
+Future<void> updateProviders(TaskModel task, WidgetRef ref) async {
+  List<String> array = await loadArray(task);
 
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return Container(
-      alignment: Alignment.center,
-      margin: const EdgeInsets.symmetric(vertical: 4),
-      width: double.infinity,
-      height: 120,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.black, width: 1.5),
-      ),
-      child: const Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Text(
-            'Create a Task to see it here!',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          Text(
-            "Click '+ New Task' above to get started",
-            style: TextStyle(fontSize: 15),
-            textAlign: TextAlign.center,
-          )
-        ],
-      ),
-    );
+  selectedRepeatingDaysList = array;
+
+  if (kDebugMode) {
+    print('list: ${selectedRepeatingDaysList.join(', ').toString()}');
   }
+
+  ref.read(selectedCategoryProvider.notifier).state = UserCreatedCategoryModel(
+    categoryID: task.categoryID,
+    categoryName: task.categoryName,
+    colorHex: task.categoryColorHex,
+  );
+  ref
+      .read(repeatingOptionDays.notifier)
+      .update((state) => selectedRepeatingDaysList);
+
+  ref
+      .read(repeatingOptionFrequency.notifier)
+      .update((state) => task.repeatingFrequency);
+  ref.read(stopDateProvider.notifier).update((state) => task.stopDate);
+  ref.read(repeatShownProvider.notifier).update((state) => task.repeatShown);
 }
 
-String formatTaskDate(String date) {
-  final taskDate = DateFormat('E, M/d/yyyy').parse(date);
-  final currentDate = DateTime.now();
-  final difference = taskDate.difference(currentDate).inDays;
+Future<List<String>> loadArray(TaskModel task) async {
+  try {
+    DocumentSnapshot snapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(userID)
+        .collection('Categories')
+        .doc(task.categoryID)
+        .collection('Tasks')
+        .doc(task.docID)
+        .get();
 
-  if (difference <= 60) {
-    return DateFormat("E, MMM d").format(taskDate);
-  } else {
-    return DateFormat('yMd').format(taskDate);
+    if (snapshot.exists && snapshot.data() != null) {
+      Map<String, dynamic>? data = snapshot.data() as Map<String, dynamic>?;
+
+      if (data != null &&
+          data.containsKey('repeatingDays') &&
+          data['repeatingDays'] is List<dynamic>) {
+        var repeatingDaysArray = data['repeatingDays'] as List<dynamic>;
+
+        List<String> array = [];
+
+        for (var day in repeatingDaysArray) {
+          if (day is String) {
+            array.add(day);
+          }
+        }
+
+        return array;
+      }
+    }
+
+    return [];
+  } catch (e) {
+    if (kDebugMode) {
+      print(e);
+    }
+    return [];
   }
 }

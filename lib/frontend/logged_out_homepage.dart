@@ -3,11 +3,11 @@ import 'package:snippet_coder_utils/hex_color.dart';
 
 import '../../backend/auth_pages/authviews/user_regist_screen.dart';
 import '../../backend/widget/botnavbar_widget.dart';
-import 'calendarpage.dart';
+import '../backend/calendar(all)/calendarpage.dart';
 import 'communitypage.dart';
 import 'goalspage.dart';
 import '../../backend/auth_pages/allthings_login/login_screen.dart';
-import 'statisticspage.dart';
+import '../backend/statistics_all/statisticspage.dart';
 
 class LoggedOutHomePage extends StatefulWidget {
   const LoggedOutHomePage({
@@ -92,14 +92,32 @@ Widget _loggedOutHomeUI(BuildContext context) {
     child: Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(10),
-          child: Image.asset(
-            'assets/Images/nplogo.png',
-            fit: BoxFit.contain,
-            width: 50,
-            height: 40,
-          ),
+        const Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Row(
+              children: [
+                CircleAvatar(
+                  backgroundColor: Color.fromARGB(255, 255, 255, 255),
+                  radius: 20,
+                  child: Text(
+                    'NP',
+                    style: TextStyle(
+                        color: Color.fromARGB(255, 0, 0, 0), fontSize: 20),
+                  ),
+                ),
+              ],
+            ),
+            Row(
+              children: [
+                Text(
+                  'Tasker',
+                  style: TextStyle(
+                      color: Color.fromARGB(255, 0, 0, 0), fontSize: 12),
+                ),
+              ],
+            ),
+          ],
         ),
         Flexible(
           child: GestureDetector(
@@ -107,12 +125,13 @@ Widget _loggedOutHomeUI(BuildContext context) {
               Navigator.push(context,
                   MaterialPageRoute(builder: (_) => const LoginScreen()));
             },
-            child: const Card(
-              child: Padding(
-                padding: EdgeInsets.all(8.0),
+            child: Card(
+              color: HexColor("c8dbc5"),
+              child: const Padding(
+                padding: EdgeInsets.fromLTRB(16.5, 8, 16.5, 8),
                 child: Text(
-                  "Already a Member? Login",
-                  style: TextStyle(fontSize: 14.0),
+                  "Login",
+                  style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.bold),
                 ),
               ),
             ),
@@ -124,12 +143,13 @@ Widget _loggedOutHomeUI(BuildContext context) {
               Navigator.push(context,
                   MaterialPageRoute(builder: (_) => const RegisterPage()));
             },
-            child: const Card(
-              child: Padding(
+            child: Card(
+              color: HexColor("#c8dbc5"),
+              child: const Padding(
                 padding: EdgeInsets.all(8.0),
                 child: Text(
-                  "Or Register Here",
-                  style: TextStyle(fontSize: 14.0),
+                  "Register",
+                  style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.bold),
                 ),
               ),
             ),

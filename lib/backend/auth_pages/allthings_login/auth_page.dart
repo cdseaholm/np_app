@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:snippet_coder_utils/hex_color.dart';
 
-import '../../../view/logged_in_homepage.dart';
-import '../../../view/logged_out_homepage.dart';
+import '../../../frontend/logged_in_homepage.dart';
+import '../../../frontend/logged_out_homepage.dart';
 import '../../tasks(all)/provider/taskproviders/service_provider.dart';
 import '../authviews/forgotpassword.dart';
 import '../authviews/user_regist_screen.dart';
@@ -20,6 +20,7 @@ class AuthPage extends ConsumerWidget {
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             ref.read(fetchCategoryTasks);
+
             return const LoggedInHomePage();
           } else {
             return const LoggedOutHomePage();

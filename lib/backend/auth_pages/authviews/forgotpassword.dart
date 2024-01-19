@@ -1,9 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:np_app/backend/auth_pages/authviews/user_regist_screen.dart';
 import 'package:snippet_coder_utils/hex_color.dart';
 
-import '../../../view/logged_out_homepage.dart';
+import '../../../frontend/logged_out_homepage.dart';
+import '../alert_messages.dart';
 import '../allthings_login/login_screen.dart';
 
 class ForgotPassword extends StatefulWidget {
@@ -71,259 +71,24 @@ class _ForgotPasswordState extends State<ForgotPassword> {
         Navigator.pop(context);
 
         if (_emailController.text.trim().isEmpty) {
-          emptyEmailMessage();
+          ForgotPasswordMessages().emptyEmailMessage(context);
         } else if (e.code == 'user-not-found') {
-          userNotFoundMessage();
+          ForgotPasswordMessages().userNotFoundMessage(context);
         } else if (e.code == 'unauthorized-continue-uri') {
-          unauthorizedURIMessage();
+          ForgotPasswordMessages().unauthorizedURIMessage(context);
         } else if (e.code == 'invalid-continue-uri') {
-          invalidURIMessage();
+          ForgotPasswordMessages().invalidURIMessage(context);
         } else if (e.code == 'missing-ios-bundle-id') {
-          missingIOSIDMessage();
+          ForgotPasswordMessages().missingIOSIDMessage(context);
         } else if (e.code == 'missing-continue-uri') {
-          missingURIMessage();
+          ForgotPasswordMessages().missingURIMessage(context);
         } else if (e.code == 'missing-android-pkg-name') {
-          missingAndroidPkgMessage();
+          ForgotPasswordMessages().missingAndroidPkgMessage(context);
         } else if (e.code == 'invalid-email') {
-          invalidEmailMessage();
+          ForgotPasswordMessages().invalidEmailMessage(context);
         }
       }
     }
-  }
-
-  //emptyEmail
-  void emptyEmailMessage() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-            backgroundColor: HexColor("#456B4C"),
-            title: const Center(
-              child: Text(
-                'Email cannot be empty',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text(
-                  'Back',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            ]);
-      },
-    );
-  }
-
-//auth/user-not-found
-  void userNotFoundMessage() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-            backgroundColor: HexColor("#456B4C"),
-            title: const Center(
-              child: Text(
-                'Email cannot be found',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (_) => const RegisterPage()));
-                },
-                child: const Text(
-                  'Click here for Signup',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-              const SizedBox(width: 40),
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text(
-                  'Back',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            ]);
-      },
-    );
-  }
-
-//auth/unauthorized-continue-uri
-  void unauthorizedURIMessage() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-            backgroundColor: HexColor("#456B4C"),
-            title: const Center(
-              child: Text(
-                'The domain of the continue URL is not whitelisted.',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text(
-                  'Back',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            ]);
-      },
-    );
-  }
-
-//auth/invalid-continue-uri
-  void invalidURIMessage() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-            backgroundColor: HexColor("#456B4C"),
-            title: const Center(
-              child: Text(
-                'The continue URL provided in the request is invalid.',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text(
-                  'Back',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            ]);
-      },
-    );
-  }
-
-//auth/missing-ios-bundle-id
-  void missingIOSIDMessage() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-            backgroundColor: HexColor("#456B4C"),
-            title: const Center(
-              child: Text(
-                'An iOS ID is needed.',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text(
-                  'Back',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            ]);
-      },
-    );
-  }
-
-//auth/missing-continue-uri
-  void missingURIMessage() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-            backgroundColor: HexColor("#456B4C"),
-            title: const Center(
-              child: Text(
-                'A continue URL must be provided.',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text(
-                  'Back',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            ]);
-      },
-    );
-  }
-
-//auth/missing-android-pkg-name
-  void missingAndroidPkgMessage() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-            backgroundColor: HexColor("#456B4C"),
-            title: const Center(
-              child: Text(
-                'An Android package name is required',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text(
-                  'Back',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            ]);
-      },
-    );
-  }
-
-//auth/invalid-email
-  void invalidEmailMessage() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-            backgroundColor: HexColor("#456B4C"),
-            title: const Center(
-              child: Text(
-                'Email is Invalid',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text(
-                  'Back',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            ]);
-      },
-    );
   }
 
   @override

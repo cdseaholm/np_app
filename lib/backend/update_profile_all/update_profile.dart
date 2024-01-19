@@ -94,34 +94,40 @@ class _UpdateProfileModelState extends ConsumerState<UpdateProfileModel> {
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: Column(
                         children: [
-                          DropdownButton<String?>(
-                            isExpanded: false,
-                            focusColor: Colors.white,
-                            value: chosenValue,
-                            style: const TextStyle(color: Colors.white),
-                            iconEnabledColor: Colors.blue,
-                            padding: const EdgeInsets.symmetric(horizontal: 10),
-                            items: dropdownItems,
-                            hint: const Text(
-                              "Change Username",
-                              style: TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w400),
+                          Container(
+                            decoration: BoxDecoration(
+                                border: Border.all(
+                                    width: 1, color: Colors.black87)),
+                            child: DropdownButton<String?>(
+                              isExpanded: false,
+                              focusColor: Colors.white,
+                              value: chosenValue,
+                              style: const TextStyle(color: Colors.white),
+                              iconEnabledColor: Colors.blue,
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 10),
+                              items: dropdownItems,
+                              hint: const Text(
+                                "Change Username",
+                                style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w400),
+                              ),
+                              onChanged: (String? value) {
+                                print('Selected value: $value');
+                                setState(() {
+                                  chosenValue = value;
+                                  if (credModel.customUsername != null) {
+                                    showCustomUsernameField =
+                                        value == 'Change Username';
+                                  } else {
+                                    showCustomUsernameField =
+                                        value == 'Add Custom Username';
+                                  }
+                                });
+                              },
                             ),
-                            onChanged: (String? value) {
-                              print('Selected value: $value');
-                              setState(() {
-                                chosenValue = value;
-                                if (credModel.customUsername != null) {
-                                  showCustomUsernameField =
-                                      value == 'Change Username';
-                                } else {
-                                  showCustomUsernameField =
-                                      value == 'Add Custom Username';
-                                }
-                              });
-                            },
                           ),
                           Visibility(
                             visible: showCustomUsernameField,

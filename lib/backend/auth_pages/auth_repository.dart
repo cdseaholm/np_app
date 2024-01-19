@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:snippet_coder_utils/hex_color.dart';
 
-import '../../view/logged_in_homepage.dart';
+import '../../frontend/logged_in_homepage.dart';
 
 class AuthRepository {
   AuthRepository(this._auth);

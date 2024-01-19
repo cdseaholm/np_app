@@ -5,8 +5,8 @@ final userID = FirebaseAuth.instance.currentUser?.uid;
 
 class UserCreatedCategoryModel {
   late String categoryID;
-  final String categoryName;
-  final String colorHex;
+  late final String categoryName;
+  late final String colorHex;
 
   UserCreatedCategoryModel({
     this.categoryID = '',

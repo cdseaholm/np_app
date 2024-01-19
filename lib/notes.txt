@@ -1,5 +1,33 @@
 ###notes for ideas: 
 
+try {
+                    if (repeatingDays.isNotEmpty &&
+                        repeatingFrequency == 'No') {
+                      ref
+                          .read(repeatShownProvider.notifier)
+                          .update((state) => repeatingDays.join(','));
+                    } else if (repeatingDays.isEmpty &&
+                        repeatingFrequency != 'No') {
+                      ref
+                          .read(repeatShownProvider.notifier)
+                          .update((state) => repeatingFrequency);
+                    } else {
+                      ref
+                          .read(repeatShownProvider.notifier)
+                          .update((state) => 'No');
+                    }
+                  } finally 
+
+
+
+
+
+
+
+
+
+
+
     allow pictures into logo
     tasks: 
         -if/auto order tasks by importance
@@ -13,6 +41,9 @@
         -(pushs) having backs
         -other fields
     Habit tracker
+
+    left off: Changed status formatting and tried adding a midnight check. Card not coming up
+        now and Category filter not popping dialogue
     
 
 

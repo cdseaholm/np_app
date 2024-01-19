@@ -6,8 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:np_app/backend/auth_pages/alert_messages.dart';
 import 'package:snippet_coder_utils/hex_color.dart';
 
-import '../../../view/logged_in_homepage.dart';
-import '../../../view/logged_out_homepage.dart';
+import '../../../frontend/logged_in_homepage.dart';
+import '../../../frontend/logged_out_homepage.dart';
 
 import '../allthings_login/login_screen.dart';
 
@@ -60,15 +60,16 @@ class _RegisterPageState extends State<RegisterPage> {
 
         User? user = result.user;
         String displayName = _firstNameController.text.trim();
+        String customUsername = '';
 
         await user?.updateDisplayName(_firstNameController.text.trim());
 
         addUserDetails(
-          displayName,
-          _firstNameController.text.trim(),
-          _lastNameController.text.trim(),
-          _emailController.text.trim(),
-        );
+            displayName,
+            _firstNameController.text.trim(),
+            _lastNameController.text.trim(),
+            _emailController.text.trim(),
+            customUsername);
 
         // ignore: use_build_context_synchronously
         Navigator.pushReplacement(
@@ -109,9 +110,8 @@ class _RegisterPageState extends State<RegisterPage> {
     }
   }
 
-  Future addUserDetails(
-      String displayName, String firstName, String lastName, String email,
-      [customUsername]) async {
+  Future addUserDetails(String displayName, String firstName, String lastName,
+      String email, String customUsername) async {
     String uid = FirebaseAuth.instance.currentUser?.uid ?? '';
     await FirebaseFirestore.instance.collection('users').doc(uid).set({
       'display name': displayName,
@@ -120,6 +120,8 @@ class _RegisterPageState extends State<RegisterPage> {
       'full name': firstName + lastName,
       'email': email,
       'custom username': customUsername,
+      'filterView': 'All',
+      'categoryFilter': 'All'
     });
   }
 

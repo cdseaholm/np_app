@@ -1,4 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class ProfileService {
   final users = FirebaseFirestore.instance.collection('users');
@@ -13,6 +15,14 @@ class ProfileService {
   Future<void> updateDisplayName(
       String userID, String updatedDisplayName) async {
     await users.doc(userID).update({'display name': updatedDisplayName});
+  }
+
+  Future<void> updateFilter(WidgetRef ref, String filterView) async {
+    final user = FirebaseAuth.instance.currentUser?.uid;
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user)
+        .update({'filterView': filterView});
   }
 
   Future<void> updateCustomUsername(

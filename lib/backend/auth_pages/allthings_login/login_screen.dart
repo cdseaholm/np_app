@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:np_app/backend/auth_pages/authviews/forgotpassword.dart';
 import 'package:snippet_coder_utils/hex_color.dart';
+import '../../../frontend/logged_out_homepage.dart';
 import '../auth_provider.dart';
 import '../auth_repository.dart';
 import '../authviews/user_regist_screen.dart';
@@ -266,7 +267,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     onTap: () => GoogleAuthService().signInWithGoogle(context),
                     child: Row(children: [
                       Image.asset(
-                        'assets/Images/google.png',
+                        'assets/Images/Google.png',
                         width: 24,
                         height: 24,
                       ),
@@ -281,30 +282,50 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             const SizedBox(height: 30),
 
             Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                const Text(
-                  'Not a member? ',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15,
-                  ),
-                ),
-                GestureDetector(
-                  onTap: () {
-                    Navigator.push(
+                Column(children: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                            builder: (_) => const RegisterPage()));
-                  },
-                  child: const Text(
-                    'Register here',
-                    style: TextStyle(
-                      color: Colors.blue,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 15,
+                          builder: (_) => const LoggedOutHomePage(),
+                        ),
+                      );
+                    },
+                    child: const Text(
+                      'Back to Main Page',
+                      style: TextStyle(color: Colors.blue, fontSize: 15),
                     ),
                   ),
+                ]),
+                Column(
+                  children: [
+                    const Text(
+                      'Not a member? ',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => const RegisterPage()));
+                      },
+                      child: const Text(
+                        'Register here',
+                        style: TextStyle(
+                          color: Colors.blue,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
